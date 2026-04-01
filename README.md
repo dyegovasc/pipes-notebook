@@ -17,7 +17,7 @@ Pipes Notebook gives your AI agent a structured operating system: canonical inst
 Copy this prompt into your AI agent (Claude, Copilot, or any agent that can read URLs):
 
 ```
-Read https://github.com/dyegovasc/pipes-notebook/blob/main/commands/init.md and execute it against this project. Use https://github.com/dyegovasc/pipes-notebook as the source repository.
+Read https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/commands/init.md and execute it against this project. Use https://github.com/dyegovasc/pipes-notebook as the source repository.
 ```
 
 The agent will:
