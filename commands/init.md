@@ -56,80 +56,68 @@ Initializes Pipes Notebook in a project through a layered sequence: scaffold str
 
 ---
 
-### Phase 3: Create .pipes Skeleton
+### Phase 3 + 4: Download and Install Content
 
-**Objective:** Copy the base .pipes structure into the target project.
+**Objective:** Download the `.pipes/` skeleton and catalog content from GitHub in a single operation, then install the right files for the selected typology.
 
 **Instructions:**
 
-1. Copy the contents of this repository's `.pipes/` folder into `{target_path}/.pipes/`. This includes:
+1. Run the following shell commands to download and extract the repository content into a temp directory:
 
-   ```
-   .pipes/
-     ai-instructions/
-     utils/
-       fragments/
-         TEMPLATE-context.md
-         TEMPLATE-instruction.md
-         TEMPLATE-output.md
-         TEMPLATE-question.md
-         TEMPLATE-validation.md
-         context/
-         instruction/
-           fragment-create-files.md
-           fragment-define-phases.md
-           fragment-identify-fragments.md
-           fragment-check-entrypoint-state.md
-           fragment-run-assembly-script.md
-         output/
-           fragment-consolidate-structure.md
-           fragment-present-memory-contract.md
-           fragment-report-entrypoint-results.md
-         question/
-           fragment-ask-memory-contract.md
-           fragment-ask-pipeline-intent.md
-           fragment-reframe-intent.md
-           fragment-request-approval.md
-         validation/
-           fragment-validate-reuse-opportunities.md
-           fragment-validate-pipes-sources.md
-       pipelines/
-         pipeline-create-pipeline.md
-         pipeline-regenerate-agent-entry-points.md
-       rules/
-       scripts/
-         assemble-instructions.js
+   ```bash
+   _pipes_tmp=$(mktemp -d)
+   curl -sL "https://github.com/dyegovasc/pipes-notebook/archive/refs/heads/main.tar.gz" \
+     | tar -xz -C "$_pipes_tmp" --strip-components=1 \
+       pipes-notebook-main/.pipes \
+       pipes-notebook-main/catalog
    ```
 
-2. Apply typology-specific additions:
-   - If `notebook`: create `{target_path}/domains/`
+   This downloads a single tar.gz archive from GitHub and extracts only the `.pipes/` and `catalog/` directories. No separate fetch per file.
+
+2. Copy `.pipes/` skeleton into the target project (skip existing files):
+
+   ```bash
+   cp -rn "$_pipes_tmp/.pipes/." "{target_path}/.pipes/"
+   ```
+
+   The `-n` flag skips any files that already exist, protecting user customizations.
+
+3. Copy **shared** ai-instructions (skip existing):
+
+   ```bash
+   cp -n "$_pipes_tmp/catalog/ai-instructions/shared/"*.md "{target_path}/.pipes/ai-instructions/"
+   ```
+
+4. Copy **typology-specific** ai-instructions (skip existing):
+
+   ```bash
+   # Replace {typology} with notebook or codebase
+   cp -n "$_pipes_tmp/catalog/ai-instructions/{typology}/"*.md "{target_path}/.pipes/ai-instructions/" 2>/dev/null || true
+   ```
+
+5. Copy **shared** rules (skip existing):
+
+   ```bash
+   cp -n "$_pipes_tmp/catalog/rules/shared/"*.md "{target_path}/.pipes/utils/rules/"
+   ```
+
+6. Copy **typology-specific** rules (skip existing):
+
+   ```bash
+   cp -n "$_pipes_tmp/catalog/rules/{typology}/"*.md "{target_path}/.pipes/utils/rules/" 2>/dev/null || true
+   ```
+
+7. Apply typology-specific additions:
+   - If `notebook`: `mkdir -p "{target_path}/domains/"`
    - If `codebase`: no additional directories
 
-3. Do not overwrite any existing files. Skip and note in output.
+8. Clean up temp directory:
 
----
+   ```bash
+   rm -rf "$_pipes_tmp"
+   ```
 
-### Phase 4: Install Catalog Content
-
-**Objective:** Copy the right ai-instructions and rules from `catalog/` into `.pipes/` based on the selected typology.
-
-**Instructions:**
-
-1. Copy **shared** ai-instructions:
-   - `catalog/ai-instructions/shared/*.md` → `{target_path}/.pipes/ai-instructions/`
-
-2. Copy **typology-specific** ai-instructions:
-   - `catalog/ai-instructions/{typology}/*.md` → `{target_path}/.pipes/ai-instructions/`
-
-3. Copy **shared** rules:
-   - `catalog/rules/shared/*.md` → `{target_path}/.pipes/utils/rules/`
-
-4. Copy **typology-specific** rules:
-   - `catalog/rules/{typology}/*.md` → `{target_path}/.pipes/utils/rules/`
-
-5. Do not overwrite existing files. If a file already exists, skip it and note it in the output. This allows re-init to add new catalog content without destroying user customizations.
-
-6. Display what was installed:
+9. Display what was installed:
    ```
    Installed ai-instructions:
      ✓ core.md (shared)
@@ -148,7 +136,7 @@ Initializes Pipes Notebook in a project through a layered sequence: scaffold str
 
 ---
 
-### Phase 5: Check Agent Entrypoints
+### Phase 4: Check Agent Entrypoints
 
 **Objective:** Detect existing agent entrypoint files and decide how to handle them.
 
@@ -161,8 +149,8 @@ Initializes Pipes Notebook in a project through a layered sequence: scaffold str
 
 2. **If none exist:**
    - Ask: "No agent entrypoint files found. Create them now?"
-   - If yes, proceed to Phase 6.
-   - If no, skip to Phase 7.
+   - If yes, proceed to Phase 5.
+   - If no, skip to Phase 6.
 
 3. **If some or all exist:**
    - For each existing file, check if it contains Pipes Notebook delimiters (`<!-- pipes-notebook:start -->` / `<!-- pipes-notebook:end -->`).
@@ -173,12 +161,12 @@ Initializes Pipes Notebook in a project through a layered sequence: scaffold str
      .github/copilot-instructions.md — missing (will create)
      ```
    - Ask: "Run pipeline-regenerate-agent-entry-points to update these?"
-   - If yes, proceed to Phase 6.
-   - If no, skip to Phase 7.
+   - If yes, proceed to Phase 5.
+   - If no, skip to Phase 6.
 
 ---
 
-### Phase 6: Generate Agent Entrypoints
+### Phase 5: Generate Agent Entrypoints
 
 **Objective:** Run the assembly script to generate or merge Pipes Notebook sections into entrypoints.
 
@@ -199,7 +187,7 @@ Initializes Pipes Notebook in a project through a layered sequence: scaffold str
 
 ---
 
-### Phase 7: Report
+### Phase 6: Report
 
 **Objective:** Summarize the initialization and suggest next steps.
 
@@ -247,8 +235,8 @@ Initializes Pipes Notebook in a project through a layered sequence: scaffold str
 
 Running init on a project that already has `.pipes/`:
 - Phase 1 detects `.pipes/` exists and skips structure creation
-- Phase 4 still runs but skips existing files (only adds new catalog content)
-- Phase 5/6 still run to update entrypoints with any new ai-instructions or rules
+- Phase 3 still runs but skips existing files (only adds new catalog content)
+- Phase 4/5 still run to update entrypoints with any new ai-instructions or rules
 
 This makes re-init safe: it adds missing content without destroying user customizations.
 
