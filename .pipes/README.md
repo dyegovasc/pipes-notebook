@@ -110,5 +110,4 @@ Check `utils/pipelines/` for a list of installed pipelines. Each file has a fron
 ## Getting Help
 
 - Full documentation: `https://github.com/dyegovasc/pipes-notebook`
-- Reference implementation: `Notebook-example/` (in the pipes-notebook repo)
 - System architecture: `ai-instructions/architecture.md`

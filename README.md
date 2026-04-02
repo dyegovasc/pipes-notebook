@@ -4,6 +4,8 @@ A markdown-first instruction system for AI coding agents.
 
 Pipes Notebook gives your AI agent a structured operating system: canonical instructions, composable pipelines, governing rules, and memory surfaces — all in plain markdown. No plugins, no vendor lock-in. Works with any agent that reads files.
 
+**The core idea:** instead of re-explaining your project, conventions, and preferences every conversation, you define them once as structured markdown. Your agent always knows where to look — and you can build new workflows on top of that foundation whenever you need them.
+
 ## What It Does
 
 - **ai-instructions/** — Canonical knowledge your agent always has access to
@@ -55,6 +57,22 @@ Read https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/commands/im
 ```
 
 The agent will list available pipelines grouped by category and let you pick which ones to install. It resolves all fragment dependencies automatically and never overwrites files you've already customised.
+
+## Build Your Own Pipelines
+
+Importing from the catalog is just the starting point. The real power is building pipelines tailored to your project.
+
+A pipeline is a plain markdown file that chains fragments together into a multi-phase workflow. You can create one for anything repetitive you do with your agent: a release checklist, an onboarding flow, a code review process, a content template — whatever fits your workflow.
+
+**To create a pipeline, just ask your agent:**
+
+```
+Create a new pipeline in .pipes/utils/pipelines/ that [describes what you want it to do].
+```
+
+The agent will scaffold the pipeline file, wire up the right fragments, and add it to your catalog so it's available in future sessions. You own it, you can edit it in plain markdown, and it works the same as any pipeline from the catalog.
+
+> The more pipelines you build, the more leverage you get — each one is a repeatable workflow your agent can execute reliably, without you explaining the steps each time.
 
 ## Updating Entrypoints
 
