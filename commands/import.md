@@ -2,14 +2,16 @@
 id: command-import
 name: Import Pipelines
 description: Selectively installs pipelines, fragments, and rules from the catalog into a project
-version: 3.0
+version: 3.1
 ---
 
 # Command: Import
 
 Imports pipelines, fragments, and rules from the catalog into an existing `.pipes/` installation.
 
-**Primary path:** run the bundled `import.js` script — it fetches the catalog, shows the list, resolves fragments, and copies files automatically.
+**CRITICAL:** The agent must ALWAYS ask the user which pipelines and rules they want before running anything. Never auto-select, never use `--all`, never use `--yes` without explicit user confirmation. The `--all --yes` flags exist only for programmatic use, not for agent-driven imports.
+
+**Primary path:** agent presents the catalog, user selects, agent runs the script with the exact selection.
 
 **Fallback:** if the script cannot be run, follow the manual phases below.
 
@@ -28,35 +30,69 @@ Imports pipelines, fragments, and rules from the catalog into an existing `.pipe
 2. Confirm `{target_path}/.pipes/utils/scripts/import.js` exists.
    - If missing, fall back to the manual path below.
 
-### Phase 2: Run the Importer
+### Phase 2: Fetch Catalog and Present Choices
 
-Run from the project root (the script derives `PROJECT_ROOT` from its own location):
+**The agent does this step — do not run the script yet.**
+
+1. Fetch the catalog:
+
+   ```bash
+   curl -sL https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/CATALOG.md
+   ```
+
+2. Parse the **Pipelines** and **Rules** tables. For each entry check if the file already exists at its destination in `{target_path}/.pipes/`.
+
+3. Display the full list grouped by domain, marking installed items with `(installed)`:
+
+   ```
+   Pipelines:
+     [all]
+       pipeline-health-check               Assesses notebook structure             (installed)
+       pipeline-initiate-session           Sets session focus and goal
+       pipeline-create-pipeline            Guides creation of a new pipeline
+       pipeline-update-catalog             Regenerates the fragment catalog
+       pipeline-regenerate-agent-entry-points  Updates agent entrypoint files
+     [codebase]
+       pipeline-define-codebase-stack      Captures stack conventions as a rule
+
+   Rules:
+     [shared]
+       rule-auto-update-catalog            Re-generates catalog on fragment changes
+       ...
+
+   (Fragments are resolved automatically from selected pipelines.)
+
+   Which pipelines and/or rules would you like to import?
+   Enter IDs separated by commas, or "all" to import everything.
+   ```
+
+4. **Wait for the user's response.** Do not proceed until the user explicitly states what they want.
+
+**Captured values:**
+- `selected_ids`: comma-separated list of IDs the user chose
+
+### Phase 3: Run the Script with the User's Selection
+
+Only after the user has chosen, run the script passing their exact selection:
 
 ```bash
 cd {target_path}
-node .pipes/utils/scripts/import.js
+node .pipes/utils/scripts/import.js --select {selected_ids}
 ```
 
 The script will:
-1. Fetch `catalog/CATALOG.md` from GitHub
-2. Display the full list of pipelines and rules, marking installed ones with `(installed)`
-3. Prompt for selection (comma-separated IDs, or `all`)
-4. Resolve fragment dependencies from each selected pipeline's frontmatter
-5. Show the import plan and ask for confirmation
-6. Download and install all files into the correct `.pipes/` directories
+1. Resolve fragment dependencies for selected pipelines
+2. Show the full import plan (pipelines, fragments, rules, already-installed skips)
+3. Ask for confirmation before downloading anything
 
-**Flags for non-interactive use:**
+If the user said `all`, use:
 
 ```bash
-# Pre-select specific pipelines/rules (still shows plan and asks to confirm)
-node .pipes/utils/scripts/import.js --select pipeline-health-check,pipeline-initiate-session
-
-# Skip the confirmation prompt
-node .pipes/utils/scripts/import.js --select pipeline-health-check --yes
-
-# Import everything
-node .pipes/utils/scripts/import.js --all --yes
+node .pipes/utils/scripts/import.js --all
 ```
+
+The `--yes` flag bypasses the script's confirmation prompt. **Only add `--yes` if the user explicitly confirmed in the conversation that they want to proceed without a further prompt.**
+
 
 ---
 
