@@ -1,7 +1,7 @@
 ---
 id: rule-validate-fragment-types
 name: Validate Fragment Types
-type: universal
+type: shared
 version: 1.0
 ---
 

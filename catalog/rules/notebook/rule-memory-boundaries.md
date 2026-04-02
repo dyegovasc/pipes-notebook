@@ -1,7 +1,7 @@
 ---
 id: rule-memory-boundaries
 name: Memory Boundaries
-type: universal
+type: notebook
 version: 1.0
 ---
 

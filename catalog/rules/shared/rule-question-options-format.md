@@ -1,7 +1,7 @@
 ---
 id: rule-question-options-format
 name: Question Options Format
-type: universal
+type: shared
 version: 1.0
 ---
 

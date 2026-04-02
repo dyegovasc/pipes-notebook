@@ -1,7 +1,7 @@
 ---
 id: rule-human-editor
 name: Human Editor
-type: universal
+type: notebook
 version: 1.0
 ---
 

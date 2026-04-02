@@ -1,7 +1,7 @@
 ---
 id: rule-auto-update-catalog
 name: Auto Update Catalog
-type: universal
+type: shared
 version: 1.0
 ---
 
