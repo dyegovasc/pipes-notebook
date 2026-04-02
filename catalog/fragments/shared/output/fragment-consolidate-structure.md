@@ -20,6 +20,9 @@ name: [Name]
 description: [Description]
 domain: [domain]
 version: 1.0
+category: [meta | capture | compose | refine | analyze | context]
+fragments:
+  - fragment-[id]
 ---
 
 # Pipeline: [Name]

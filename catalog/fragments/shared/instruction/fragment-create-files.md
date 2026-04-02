@@ -35,7 +35,7 @@ Creates the pipeline and fragment files on disk.
 
 ## Inputs
 
-- Pipeline ID, name, description, domain, phases
+- Pipeline ID, name, description, domain, category, fragments list, phases
 - Fragment definitions (id, type, name, content)
 
 ## Output

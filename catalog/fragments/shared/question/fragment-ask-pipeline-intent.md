@@ -17,9 +17,11 @@ What should this pipeline do? Describe the goal or task you want to automate.
 - What is the main objective?
 - Who will use this pipeline?
 - What domain does it belong to?
+- What category best describes it? (`meta` | `capture` | `compose` | `refine` | `analyze` | `context`)
 - Are there specific inputs or outputs?
 
 ## Capture
 - Pipeline goal
 - Target domain
+- Category
 - Any constraints mentioned

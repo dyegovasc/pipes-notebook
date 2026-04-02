@@ -204,18 +204,20 @@ Initializes Pipes Notebook in a project through a layered sequence: scaffold str
    **For `notebook`:**
    ```
    Next steps:
-   1. Define your domains by creating folders under domains/
-   2. Customize .pipes/ai-instructions/ for your specific needs
-   3. Create new pipelines with pipeline-create-pipeline
-   4. Re-run pipeline-regenerate-agent-entry-points after editing ai-instructions or rules
+   1. Read .pipes/README.md — it explains how to run pipelines, import more, and what to customise
+   2. Define your domains by creating folders under domains/
+   3. Customize .pipes/ai-instructions/ for your specific needs
+   4. Create new pipelines with pipeline-create-pipeline
+   5. Re-run pipeline-regenerate-agent-entry-points after editing ai-instructions or rules
    ```
 
    **For `codebase`:**
    ```
    Next steps:
-   1. Customize .pipes/ai-instructions/ for your specific needs
-   2. Create new pipelines with pipeline-create-pipeline
-   3. Re-run pipeline-regenerate-agent-entry-points after editing ai-instructions or rules
+   1. Read .pipes/README.md — it explains how to run pipelines, import more, and what to customise
+   2. Customize .pipes/ai-instructions/ for your specific needs
+   3. Create new pipelines with pipeline-create-pipeline
+   4. Re-run pipeline-regenerate-agent-entry-points after editing ai-instructions or rules
    ```
 
 ---
