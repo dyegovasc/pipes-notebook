@@ -1,208 +1,111 @@
 ---
 id: command-import
 name: Import Pipelines
-description: Selectively installs pipelines (and their fragment dependencies) from the catalog into a project
-version: 1.0
+description: Selectively installs pipelines, fragments, and rules from the catalog into a project
+version: 3.0
 ---
 
 # Command: Import
 
-Imports one or more pipelines from the `catalog/` into an existing `.pipes/` installation. Resolves and copies all fragment dependencies automatically.
+Imports pipelines, fragments, and rules from the catalog into an existing `.pipes/` installation.
+
+**Primary path:** run the bundled `import.js` script — it fetches the catalog, shows the list, resolves fragments, and copies files automatically.
+
+**Fallback:** if the script cannot be run, follow the manual phases below.
 
 ## Prerequisites
 
 - The target project already has `.pipes/` installed (run `init` first if not)
-- This repository (pipes-notebook) is accessible for reading `catalog/` content
+- Node.js is available (`node --version`)
 
 ---
 
-## Phases
+## Primary Path: Run the Script
 
 ### Phase 1: Check Installation
 
-**Objective:** Confirm the target project has a valid `.pipes/` structure before importing anything.
-
-**Instructions:**
-
 1. Ask the user for the **target path** if not already known.
+2. Confirm `{target_path}/.pipes/utils/scripts/import.js` exists.
+   - If missing, fall back to the manual path below.
 
+### Phase 2: Run the Importer
+
+Run from the project root (the script derives `PROJECT_ROOT` from its own location):
+
+```bash
+cd {target_path}
+node .pipes/utils/scripts/import.js
+```
+
+The script will:
+1. Fetch `catalog/CATALOG.md` from GitHub
+2. Display the full list of pipelines and rules, marking installed ones with `(installed)`
+3. Prompt for selection (comma-separated IDs, or `all`)
+4. Resolve fragment dependencies from each selected pipeline's frontmatter
+5. Show the import plan and ask for confirmation
+6. Download and install all files into the correct `.pipes/` directories
+
+**Flags for non-interactive use:**
+
+```bash
+# Pre-select specific pipelines/rules (still shows plan and asks to confirm)
+node .pipes/utils/scripts/import.js --select pipeline-health-check,pipeline-initiate-session
+
+# Skip the confirmation prompt
+node .pipes/utils/scripts/import.js --select pipeline-health-check --yes
+
+# Import everything
+node .pipes/utils/scripts/import.js --all --yes
+```
+
+---
+
+## Fallback Path: Manual Steps
+
+Use if `import.js` is not available or Node.js is not installed.
+
+### Phase 1: Check Installation
+
+1. Ask the user for the **target path**.
 2. Check that `{target_path}/.pipes/utils/pipelines/` and `{target_path}/.pipes/utils/fragments/` exist.
-   - If either is missing, stop and tell the user to run `init` first.
+   - If missing, stop and tell the user to run `init` first.
 
-3. Proceed to Phase 2.
+### Phase 2: Read Catalog and Show List
 
-**Captured values:**
-- `target_path`: absolute path to the project
-
----
-
-### Phase 2: Identify Typology
-
-**Objective:** Determine which catalog sections to show.
-
-**Instructions:**
-
-1. Ask the user:
-
-   > What type of project is this?
-   >
-   > - shared: "Show pipelines available for any project type"
-   > - notebook: "Show notebook-specific pipelines (includes shared)"
-   > - codebase: "Show codebase-specific pipelines (includes shared)"
-
-2. Capture the selection as `typology`.
-
-**Captured values:**
-- `typology`: `shared` | `notebook` | `codebase`
-
----
-
-### Phase 3: List Available Pipelines
-
-**Objective:** Download the catalog and present available pipelines grouped by category.
-
-**Instructions:**
-
-1. Download the catalog in a single operation:
+1. Fetch `catalog/CATALOG.md`:
 
    ```bash
-   _pipes_tmp=$(mktemp -d)
-   curl -sL "https://github.com/dyegovasc/pipes-notebook/archive/refs/heads/main.tar.gz" \
-     | tar -xz -C "$_pipes_tmp" --strip-components=1 \
-       pipes-notebook-main/catalog/pipelines
+   curl -sL https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/CATALOG.md
    ```
 
-2. Collect pipeline files from:
-   - `$_pipes_tmp/catalog/pipelines/shared/`
-   - `$_pipes_tmp/catalog/pipelines/{typology}/` (if typology is not `shared`)
+2. Parse the **Pipelines** and **Rules** tables. For each entry, check if the file already exists at its destination.
 
-3. For each pipeline file, read the frontmatter fields: `id`, `name`, `description`, `category`.
+3. Respond immediately with the full list, marking installed items. Ask in the same message which IDs to import.
 
-4. Group by `category` and display:
+### Phase 3: Resolve and Confirm
 
-   ```
-   Available pipelines:
+1. For each selected pipeline, fetch it and extract the `fragments:` frontmatter list.
+2. Look up each fragment ID in CATALOG.md's Fragments table to get its `url`.
+3. Show the import plan (pipelines, fragments, rules, skipped). Wait for confirmation.
 
-     Meta
-       pipeline-health-check        Assesses notebook structure against canonical guidelines
-       pipeline-update-catalog      Regenerates the fragment catalog
+### Phase 4: Copy Files
 
-     Session
-       pipeline-initiate-session    Sets focus by capturing domain, folder, and goal
-   ```
+For each file to install:
 
-5. If a pipeline is already installed at `{target_path}/.pipes/utils/pipelines/`, mark it with `(installed)`.
+1. Source URL: the absolute `url` from CATALOG.md (`raw.githubusercontent.com/…`)
+2. Destination:
+   - Pipeline → `{target_path}/.pipes/utils/pipelines/{filename}`
+   - Fragment → `{target_path}/.pipes/utils/fragments/{type}/{filename}` (`type` = second-to-last URL segment)
+   - Rule → `{target_path}/.pipes/utils/rules/{filename}`
 
----
+```bash
+mkdir -p "{destination_dir}"
+curl -sL "{url}" -o "{destination_path}"   # only if file does not exist
+```
 
-### Phase 4: Select Pipelines
+### Phase 5: Report
 
-**Objective:** Capture which pipelines the user wants to import.
-
-**Instructions:**
-
-1. Ask:
-
-   > Which pipelines would you like to import? Enter IDs separated by commas, or type `all` to import everything shown.
-
-2. Validate each entered ID exists in the displayed list.
-
-3. If any ID is invalid, list the unrecognised ones and ask again.
-
-**Captured values:**
-- `selected_ids`: list of pipeline IDs to import
-
----
-
-### Phase 5: Resolve Fragment Dependencies
-
-**Objective:** Determine all fragment files that need to be copied.
-
-**Instructions:**
-
-1. For each selected pipeline, read its `fragments:` frontmatter list.
-
-2. Build a deduplicated flat list of all required fragment IDs across all selected pipelines.
-
-3. Locate each fragment in:
-   - `$_pipes_tmp/catalog/fragments/shared/{type}/fragment-{id}.md`
-   - `$_pipes_tmp/catalog/fragments/{typology}/{type}/fragment-{id}.md`
-
-   To find the right subdirectory, read the fragment file's `type:` frontmatter field.
-
-4. If any fragment cannot be located, report it as missing and stop.
-
-5. Display the resolution plan:
-
-   ```
-   Import plan:
-     Pipelines  (2): pipeline-health-check, pipeline-initiate-session
-     Fragments (11): fragment-check-directory-structure,
-                     fragment-check-naming-conventions, ...
-
-   Files already installed (will skip):
-     — none
-
-   Proceed?
-   ```
-
-6. Wait for user confirmation before continuing.
-
----
-
-### Phase 6: Copy Files
-
-**Objective:** Install pipelines and fragments into the target project.
-
-**Instructions:**
-
-1. Copy pipeline files (skip existing):
-
-   ```bash
-   cp -n "$_pipes_tmp/catalog/pipelines/shared/pipeline-{id}.md" \
-     "{target_path}/.pipes/utils/pipelines/"
-   # Repeat for typology-specific pipelines
-   ```
-
-2. Copy each fragment to its type directory (skip existing):
-
-   ```bash
-   cp -n "$_pipes_tmp/catalog/fragments/shared/{type}/fragment-{id}.md" \
-     "{target_path}/.pipes/utils/fragments/{type}/"
-   ```
-
-3. Clean up:
-
-   ```bash
-   rm -rf "$_pipes_tmp"
-   ```
-
----
-
-### Phase 7: Report
-
-**Objective:** Summarise what was installed.
-
-**Instructions:**
-
-1. Display results:
-
-   ```
-   Import complete:
-
-   Pipelines:
-     ✓ pipeline-health-check       — installed
-     ✓ pipeline-initiate-session   — installed
-     — pipeline-update-catalog     — already existed (skipped)
-
-   Fragments:
-     ✓ 10 installed
-     — 1 already existed (skipped)
-
-   Next steps:
-   - Run pipeline-health-check to verify your .pipes/ structure
-   - Run pipeline-initiate-session to start a working session
-   ```
+Display what was installed vs skipped.
 
 ---
 
@@ -210,14 +113,18 @@ Imports one or more pipelines from the `catalog/` into an existing `.pipes/` ins
 
 | Condition | Action |
 |-----------|--------|
-| `.pipes/` not found in target | Stop and tell user to run `init` first |
-| Pipeline ID not in catalog | List invalid IDs, ask user to correct |
-| Fragment missing from catalog | Report missing ID, stop before copying anything |
-| File write fails | Report error with path, continue with remaining files |
+| `.pipes/` not found | Stop — tell user to run `init` first |
+| `import.js` missing | Use manual fallback path |
+| ID not in catalog | List invalid IDs, ask user to correct |
+| Fragment not in CATALOG.md | Report missing ID, stop |
+| Network error | Report URL and error, continue with remaining files |
 
 ## Notes
 
-- Import never overwrites existing files. Re-running import after a catalog update will only add new fragments.
+- `import.js` is installed automatically during `init` as part of the `.pipes/` skeleton.
+- Import never overwrites existing files. Re-run to pick up newly added catalog entries.
+- Fragments are always resolved from pipeline dependencies — never selected individually.
+- Rules must be selected explicitly; they are not auto-resolved from pipelines.
 - The `fragments:` frontmatter list in each catalog pipeline is the authoritative dependency manifest.
 - Fragment type (subdirectory) is resolved from the fragment file's own `type:` frontmatter, not inferred from the path.
 - `shared` pipelines and fragments are always available regardless of typology selection.
