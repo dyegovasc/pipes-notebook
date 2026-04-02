@@ -4,6 +4,12 @@ name: Regenerate Agent Entry Points
 description: Generates or updates agent entrypoint files with Pipes Notebook instructions using delimiter-based merge
 domain: all
 version: 1.0
+category: meta
+fragments:
+  - fragment-validate-pipes-sources
+  - fragment-check-entrypoint-state
+  - fragment-run-assembly-script
+  - fragment-report-entrypoint-results
 ---
 
 # Pipeline: Regenerate Agent Entry Points

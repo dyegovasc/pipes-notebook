@@ -4,7 +4,7 @@ name: Initiate Session
 description: Sets the focus for an interaction by capturing domain, folder, and high-level goal
 domain: all
 version: 1.0
-category: session
+category: context
 fragments:
   - fragment-ask-domain
   - fragment-deliver-question-with-options

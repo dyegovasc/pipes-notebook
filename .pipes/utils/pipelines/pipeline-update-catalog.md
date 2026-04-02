@@ -4,6 +4,12 @@ name: Update Fragment Catalog
 description: Regenerates the fragment catalog by scanning all fragment files
 domain: all
 version: 1.0
+category: meta
+fragments:
+  - fragment-scan-fragments-for-catalog
+  - fragment-scan-pipelines
+  - fragment-generate-catalog
+  - fragment-confirm-catalog-update
 ---
 
 # Pipeline: Update Fragment Catalog

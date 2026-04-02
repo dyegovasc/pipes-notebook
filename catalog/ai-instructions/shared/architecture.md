@@ -34,7 +34,24 @@ name: Human-readable name
 description: One-line summary
 domain: all | {domain-name}
 version: {semver}
+category: meta | session | writing | ingestion | ticket | memory
+fragments:
+  - fragment-{id}
+  - fragment-{id}
 ```
+
+**Valid categories:**
+
+| Category | Pattern | Examples |
+|----------|---------|----------|
+| `meta` | Pipelines that operate on `.pipes/` itself | Health check, create pipeline, update catalog, regenerate entrypoints |
+| `capture` | Bring information in from sources | Ingest content, fetch ticket, scan folder |
+| `compose` | Produce new output from inputs | Write user story, write implementation plan, draft document |
+| `refine` | Improve or validate existing content | Text refinement, zero-ambiguity review, style editing |
+| `analyze` | Decompose, investigate, or understand | Debug an issue, split complex problem, dependency mapping |
+| `context` | Manage session state and memory | Initiate session, compact context, promote durable memory |
+
+Every pipeline must declare exactly one `category`. The `import` command uses this field to group pipelines when listing the catalog.
 
 **Phase structure:**
 ```

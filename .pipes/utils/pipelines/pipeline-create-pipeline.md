@@ -4,6 +4,18 @@ name: Create Pipeline
 description: Guides user through creating a new pipeline with phases and fragments
 domain: all
 version: 1.0
+category: meta
+fragments:
+  - fragment-ask-pipeline-intent
+  - fragment-reframe-intent
+  - fragment-define-phases
+  - fragment-ask-memory-contract
+  - fragment-present-memory-contract
+  - fragment-identify-fragments
+  - fragment-validate-reuse-opportunities
+  - fragment-consolidate-structure
+  - fragment-request-approval
+  - fragment-create-files
 ---
 
 # Pipeline: Create Pipeline
