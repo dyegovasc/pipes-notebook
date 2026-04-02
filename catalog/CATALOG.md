@@ -20,7 +20,10 @@ URL is an absolute `raw.githubusercontent.com` link — fetch directly or use to
 | pipeline-create-pipeline | Create Pipeline | Guides user through creating a new pipeline with phases and fragments | all | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/pipelines/shared/pipeline-create-pipeline.md |
 | pipeline-update-catalog | Update Fragment Catalog | Regenerates the fragment catalog by scanning all fragment files | all | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/pipelines/shared/pipeline-update-catalog.md |
 | pipeline-regenerate-agent-entry-points | Regenerate Agent Entry Points | Generates or updates agent entrypoint files using delimiter-based merge | all | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/pipelines/shared/pipeline-regenerate-agent-entry-points.md |
-| pipeline-define-codebase-stack | Define Codebase Stack Rule | Captures project stack, conventions and writes an on-demand rule to .pipes/utils/rules/ | codebase | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/pipelines/codebase/pipeline-define-codebase-stack.md |
+| pipeline-define-notebook-purpose | Define Notebook Purpose | Captures the notebook's purpose, domains, and workflow and generates a project identity ai-instruction | notebook | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/pipelines/notebook/pipeline-define-notebook-purpose.md |
+| pipeline-define-writing-style | Define Writing Style | Captures writing preferences and generates a tailored writing style rule | notebook | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/pipelines/notebook/pipeline-define-writing-style.md |
+| pipeline-define-codebase-stack | Define Codebase Stack | Captures project stack, conventions, and generates a project identity ai-instruction and a codebase conventions rule | codebase | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/pipelines/codebase/pipeline-define-codebase-stack.md |
+| pipeline-define-commit-guardrails | Define Commit Guardrails | Captures VCS and commit safety requirements and generates a tailored commit guardrails rule | codebase | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/pipelines/codebase/pipeline-define-commit-guardrails.md |
 
 ---
 
@@ -43,7 +46,7 @@ URL is an absolute `raw.githubusercontent.com` link — fetch directly or use to
 | fragment-generate-catalog | Generate Catalog | Generates the CATALOG.md file from collected fragment and pipeline metadata | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/shared/instruction/fragment-generate-catalog.md |
 | fragment-identify-fragments | Identify Fragments | Selects or proposes fragments required for the pipeline being designed | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/shared/instruction/fragment-identify-fragments.md |
 | fragment-read-memory-context | Read Memory Context | Reads MEMORY.md and CURRENT.md files to load session context | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/shared/instruction/fragment-read-memory-context.md |
-| fragment-run-assembly-script | Run Assembly Script | Executes the .pipes/utils/scripts/assemble.sh script | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/shared/instruction/fragment-run-assembly-script.md |
+| fragment-run-assembly-script | Run Assembly Script | Executes the .pipes/utils/scripts/assemble-instructions.js script | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/shared/instruction/fragment-run-assembly-script.md |
 | fragment-scan-fragments-for-catalog | Scan Fragments For Catalog | Scans fragment directories and extracts metadata from each file | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/shared/instruction/fragment-scan-fragments-for-catalog.md |
 | fragment-scan-pipelines | Scan Pipelines | Scans the pipeline directory and extracts metadata from each file | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/shared/instruction/fragment-scan-pipelines.md |
 
@@ -78,18 +81,46 @@ URL is an absolute `raw.githubusercontent.com` link — fetch directly or use to
 | fragment-validate-pipes-sources | Validate Pipes Sources | Validates the pipes-notebook source path is accessible | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/shared/validation/fragment-validate-pipes-sources.md |
 | fragment-validate-reuse-opportunities | Validate Reuse Opportunities | Checks for existing fragments that could satisfy new requirements | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/shared/validation/fragment-validate-reuse-opportunities.md |
 
+### notebook › instruction
+
+| id | name | description | url |
+|---|---|---|---|
+| fragment-check-existing-project-instruction | Check Existing Project Instruction | Detects whether a project.md already exists and sets create vs update mode | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/notebook/instruction/fragment-check-existing-project-instruction.md |
+| fragment-check-existing-style-rule | Check Existing Style Rule | Detects whether a writing style rule already exists and sets create vs update mode | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/notebook/instruction/fragment-check-existing-style-rule.md |
+| fragment-draft-project-instruction | Draft Project Instruction | Drafts project.md content from confirmed notebook purpose inputs | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/notebook/instruction/fragment-draft-project-instruction.md |
+| fragment-draft-writing-style-rule | Draft Writing Style Rule | Drafts writing style rule content from confirmed preferences | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/notebook/instruction/fragment-draft-writing-style-rule.md |
+
+### notebook › output
+
+| id | name | description | url |
+|---|---|---|---|
+| fragment-format-project-instruction | Format Project Instruction | Formats project.md as a structured inline ai-instruction file | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/notebook/output/fragment-format-project-instruction.md |
+| fragment-format-writing-style-rule | Format Writing Style Rule | Formats the writing style rule as a structured rule file | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/notebook/output/fragment-format-writing-style-rule.md |
+
+### notebook › question
+
+| id | name | description | url |
+|---|---|---|---|
+| fragment-ask-notebook-purpose | Ask Notebook Purpose | Asks for the notebook's purpose, domains, workflow, and integrations | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/notebook/question/fragment-ask-notebook-purpose.md |
+| fragment-ask-writing-preferences | Ask Writing Preferences | Asks for tone, banned words, formatting constraints, and domain exceptions | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/notebook/question/fragment-ask-writing-preferences.md |
+
 ### codebase › instruction
 
 | id | name | description | url |
 |---|---|---|---|
 | fragment-check-existing-stack-rule | Check Existing Stack Rule | Reads any existing stack rule file for the project | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-check-existing-stack-rule.md |
 | fragment-draft-stack-rule | Draft Stack Rule | Drafts stack rule content from the captured project details | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-draft-stack-rule.md |
+| fragment-check-existing-guardrails-rule | Check Existing Guardrails Rule | Detects whether a commit guardrails rule already exists and sets create vs update mode | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-check-existing-guardrails-rule.md |
+| fragment-draft-commit-guardrails-rule | Draft Commit Guardrails Rule | Drafts commit guardrails rule content from confirmed VCS and security inputs | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-draft-commit-guardrails-rule.md |
+| fragment-draft-codebase-conventions-rule | Draft Codebase Conventions Rule | Drafts codebase conventions rule content from confirmed dos, don'ts, and practices | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-draft-codebase-conventions-rule.md |
 
 ### codebase › output
 
 | id | name | description | url |
 |---|---|---|---|
 | fragment-format-stack-rule | Format Stack Rule | Formats the drafted stack rule as a structured rule file | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/output/fragment-format-stack-rule.md |
+| fragment-format-commit-guardrails-rule | Format Commit Guardrails Rule | Formats the commit guardrails rule as a structured rule file | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/output/fragment-format-commit-guardrails-rule.md |
+| fragment-format-codebase-conventions-rule | Format Codebase Conventions Rule | Formats the codebase conventions rule as a structured rule file | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/output/fragment-format-codebase-conventions-rule.md |
 
 ### codebase › question
 
@@ -97,6 +128,7 @@ URL is an absolute `raw.githubusercontent.com` link — fetch directly or use to
 |---|---|---|---|
 | fragment-ask-project-context | Ask Project Context | Asks for high-level context about the codebase and team | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/question/fragment-ask-project-context.md |
 | fragment-ask-stack-details | Ask Stack Details | Asks detailed questions about technologies, tooling, and conventions | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/question/fragment-ask-stack-details.md |
+| fragment-ask-commit-preferences | Ask Commit Preferences | Asks for VCS, package manager, secret patterns, and commit safety requirements | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/question/fragment-ask-commit-preferences.md |
 
 ---
 
@@ -104,9 +136,7 @@ URL is an absolute `raw.githubusercontent.com` link — fetch directly or use to
 
 | id | name | description | domain | url |
 |---|---|---|---|---|
-| rule-auto-update-catalog | Auto Update Catalog | Automatically regenerates the fragment catalog when fragments or pipelines change | shared | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/rules/shared/rule-auto-update-catalog.md |
-| rule-question-options-format | Question Options Format | Enforces machine-readable options in question fragments for tool-based delivery | shared | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/rules/shared/rule-question-options-format.md |
-| rule-validate-fragment-types | Validate Fragment Types | Validates that all fragments conform to their declared type's required structure | shared | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/rules/shared/rule-validate-fragment-types.md |
-| rule-human-editor | Human Editor | Enforces human-quality voice and style in all writing output | notebook | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/rules/notebook/rule-human-editor.md |
+| rule-auto-update-catalog | Auto Update Catalog | Regenerates CATALOG.md when fragments, pipelines, or rules are created, modified, or deleted | shared | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/rules/shared/rule-auto-update-catalog.md |
+| rule-question-options-format | Question Options Format | Enforces machine-readable key-value options in question fragments | shared | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/rules/shared/rule-question-options-format.md |
+| rule-validate-fragment-types | Validate Fragment Types | Validates fragment files conform to their declared type's required structure | shared | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/rules/shared/rule-validate-fragment-types.md |
 | rule-memory-boundaries | Memory Boundaries | Constrains how MEMORY.md and CURRENT.md may be read, written, and interpreted | notebook | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/rules/notebook/rule-memory-boundaries.md |
-| rule-git-commit-guardrails | Git Commit Guardrails | Prevents committing secrets, credentials, or bloated artifacts before pushing | codebase | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/rules/codebase/rule-git-commit-guardrails.md |

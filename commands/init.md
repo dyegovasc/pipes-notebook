@@ -2,12 +2,12 @@
 id: command-init
 name: Initialize Pipes Notebook
 description: Scaffolds Pipes Notebook into a project, copies typology-appropriate content, and handles agent entrypoints
-version: 2.0
+version: 3.0
 ---
 
 # Command: Init
 
-Initializes Pipes Notebook in a project through a layered sequence: scaffold structure, identify typology, install catalog content, and handle agent entrypoints.
+Initializes Pipes Notebook in a project through a layered sequence: scaffold structure, identify typology, install catalog content, install setup pipelines, and handle agent entrypoints.
 
 ## Prerequisites
 
@@ -85,14 +85,19 @@ Initializes Pipes Notebook in a project through a layered sequence: scaffold str
 3. Copy **shared** ai-instructions (skip existing):
 
    ```bash
-   cp -n "$_pipes_tmp/catalog/ai-instructions/shared/"*.md "{target_path}/.pipes/ai-instructions/"
+   cp -n "$_pipes_tmp/catalog/ai-instructions/shared/core.md" "{target_path}/.pipes/ai-instructions/"
+   cp -n "$_pipes_tmp/catalog/ai-instructions/shared/architecture.md" "{target_path}/.pipes/ai-instructions/"
    ```
+
+   Note: `tools.md` is no longer a catalog file. The shared set is `core.md` and `architecture.md` only.
 
 4. Copy **typology-specific** ai-instructions (skip existing):
 
    ```bash
-   # Replace {typology} with notebook or codebase
-   cp -n "$_pipes_tmp/catalog/ai-instructions/{typology}/"*.md "{target_path}/.pipes/ai-instructions/" 2>/dev/null || true
+   # For notebook only — codebase has no pre-written ai-instructions
+   if [ "{typology}" = "notebook" ]; then
+     cp -n "$_pipes_tmp/catalog/ai-instructions/notebook/"*.md "{target_path}/.pipes/ai-instructions/" 2>/dev/null || true
+   fi
    ```
 
 5. Copy **shared** rules (skip existing):
@@ -104,35 +109,68 @@ Initializes Pipes Notebook in a project through a layered sequence: scaffold str
 6. Copy **typology-specific** rules (skip existing):
 
    ```bash
+   # For notebook: only rule-memory-boundaries (rule-human-editor is no longer in catalog)
+   # For codebase: no pre-written rules (rule-git-commit-guardrails is no longer in catalog)
    cp -n "$_pipes_tmp/catalog/rules/{typology}/"*.md "{target_path}/.pipes/utils/rules/" 2>/dev/null || true
    ```
 
-7. Apply typology-specific additions:
+7. Install **setup pipelines** for the typology and their fragment dependencies (skip existing):
+
+   ```bash
+   # Install setup pipelines
+   cp -n "$_pipes_tmp/catalog/pipelines/{typology}/"*.md "{target_path}/.pipes/utils/pipelines/" 2>/dev/null || true
+
+   # Install fragment dependencies for setup pipelines
+   for type in question instruction output; do
+     cp -n "$_pipes_tmp/catalog/fragments/{typology}/$type/"*.md "{target_path}/.pipes/utils/fragments/$type/" 2>/dev/null || true
+   done
+   ```
+
+8. Apply typology-specific additions:
    - If `notebook`: `mkdir -p "{target_path}/domains/"`
    - If `codebase`: no additional directories
 
-8. Clean up temp directory:
+9. Clean up temp directory:
 
    ```bash
    rm -rf "$_pipes_tmp"
    ```
 
-9. Display what was installed:
-   ```
-   Installed ai-instructions:
-     ✓ core.md (shared)
-     ✓ architecture.md (shared)
-     ✓ tools.md (shared)
-     ✓ note-operations.md (notebook)
-     — core.md already exists (skipped)
+10. Display what was installed:
 
-   Installed rules:
-     ✓ rule-validate-fragment-types.md (shared)
-     ✓ rule-auto-update-catalog.md (shared)
-     ✓ rule-memory-boundaries.md (notebook)
-     ✓ rule-human-editor.md (notebook)
-     ✓ rule-question-options-format.md (notebook)
-   ```
+    **For `notebook`:**
+    ```
+    Installed ai-instructions:
+      ✓ core.md (shared, framework, inline)
+      ✓ architecture.md (shared, framework, reference)
+      ✓ note-operations.md (notebook, feature, inline)
+
+    Installed rules:
+      ✓ rule-auto-update-catalog.md (shared, framework)
+      ✓ rule-validate-fragment-types.md (shared, framework)
+      ✓ rule-question-options-format.md (shared, framework)
+      ✓ rule-memory-boundaries.md (notebook, feature)
+
+    Installed setup pipelines:
+      ✓ pipeline-define-notebook-purpose (generates project identity)
+      ✓ pipeline-define-writing-style (generates writing style rule)
+    ```
+
+    **For `codebase`:**
+    ```
+    Installed ai-instructions:
+      ✓ core.md (shared, framework, inline)
+      ✓ architecture.md (shared, framework, reference)
+
+    Installed rules:
+      ✓ rule-auto-update-catalog.md (shared, framework)
+      ✓ rule-validate-fragment-types.md (shared, framework)
+      ✓ rule-question-options-format.md (shared, framework)
+
+    Installed setup pipelines:
+      ✓ pipeline-define-codebase-stack (generates project identity + conventions rule)
+      ✓ pipeline-define-commit-guardrails (generates commit safety rule)
+    ```
 
 ---
 
@@ -197,6 +235,7 @@ Initializes Pipes Notebook in a project through a layered sequence: scaffold str
    - Structure created or already existed
    - Typology selected
    - ai-instructions and rules installed
+   - Setup pipelines installed
    - Entrypoints created, updated, or skipped
 
 2. Display next steps based on typology:
@@ -204,20 +243,20 @@ Initializes Pipes Notebook in a project through a layered sequence: scaffold str
    **For `notebook`:**
    ```
    Next steps:
-   1. Read .pipes/README.md — it explains how to run pipelines, import more, and what to customise
-   2. Define your domains by creating folders under domains/
-   3. Customize .pipes/ai-instructions/ for your specific needs
-   4. Create new pipelines with pipeline-create-pipeline
-   5. Re-run pipeline-regenerate-agent-entry-points after editing ai-instructions or rules
+   1. Run pipeline-define-notebook-purpose — give your vault an identity (recommended first)
+   2. Run pipeline-define-writing-style — configure your writing rules
+   3. Define your domains by creating folders under domains/
+   4. Import more pipelines with the import command
+   5. Run pipeline-regenerate-agent-entry-points after any rule or ai-instruction changes
    ```
 
    **For `codebase`:**
    ```
    Next steps:
-   1. Read .pipes/README.md — it explains how to run pipelines, import more, and what to customise
-   2. Customize .pipes/ai-instructions/ for your specific needs
-   3. Create new pipelines with pipeline-create-pipeline
-   4. Re-run pipeline-regenerate-agent-entry-points after editing ai-instructions or rules
+   1. Run pipeline-define-codebase-stack — capture your project's tech stack, architecture, and conventions (recommended first)
+   2. Run pipeline-define-commit-guardrails — configure commit safety checks
+   3. Import more pipelines with the import command
+   4. Run pipeline-regenerate-agent-entry-points after any rule or ai-instruction changes
    ```
 
 ---
@@ -245,7 +284,8 @@ This makes re-init safe: it adds missing content without destroying user customi
 ## Notes
 
 - The `.pipes/` skeleton contains base pipelines, fragments, templates, and the assembly script. No ai-instructions or rules.
-- ai-instructions and rules come exclusively from `catalog/` during Phase 4, selected by typology.
+- ai-instructions and rules come exclusively from `catalog/` during Phase 3, selected by typology.
+- Project-tier files (`project.md`, `rule-writing-style.md`, `rule-codebase-conventions.md`, `rule-commit-guardrails.md`) are never pre-installed — they are generated by the setup pipelines, which ask the user for project-specific information.
 - Agent entrypoints use HTML comment delimiters to isolate the Pipes Notebook section from existing file content.
 - The assembly script reads from `.pipes/ai-instructions/` and `.pipes/utils/rules/`, not from `catalog/`.
 

@@ -3,6 +3,7 @@ id: rule-memory-boundaries
 name: Memory Boundaries
 type: notebook
 version: 1.0
+description: Constrains how MEMORY.md and CURRENT.md may be read, written, and interpreted
 ---
 
 # Rule: Memory Boundaries

@@ -3,6 +3,7 @@ id: rule-validate-fragment-types
 name: Validate Fragment Types
 type: shared
 version: 1.0
+description: Validates fragment files conform to their declared type's required structure
 ---
 
 # Rule: Validate Fragment Types

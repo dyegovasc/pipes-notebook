@@ -1,26 +1,31 @@
 ---
 id: pipeline-define-codebase-stack
-name: Define Codebase Stack Rule
-description: Captures project stack, best practices, and conventions and writes an on-demand rule to .pipes/utils/rules/
+name: Define Codebase Stack
+description: Captures project stack, conventions, and generates a project identity ai-instruction and a codebase conventions rule
 domain: codebase
-version: 1.0
+version: 1.1
 category: compose
 fragments:
   - fragment-ask-project-context
   - fragment-ask-stack-details
   - fragment-check-existing-stack-rule
   - fragment-reframe-intent
-  - fragment-draft-stack-rule
-  - fragment-format-stack-rule
+  - fragment-draft-project-instruction
+  - fragment-draft-codebase-conventions-rule
+  - fragment-format-project-instruction
+  - fragment-format-codebase-conventions-rule
   - fragment-request-approval
   - fragment-create-files
 ---
 
-# Pipeline: Define Codebase Stack Rule
+# Pipeline: Define Codebase Stack
 
-Guides the user through capturing their project's tech stack, architecture decisions, best practices, and coding conventions, then writes a persistent `rule-codebase-stack.md` to `.pipes/utils/rules/`.
+Guides the user through capturing their project's tech stack, architecture decisions, best practices, and coding conventions, then writes two persistent files:
 
-This rule is **on-demand** — it lives in the project's own `.pipes/`, not in the catalog. It defines the project-specific truth for AI agents working in that codebase.
+- **`.pipes/ai-instructions/project.md`** (`assembly: inline`) — project identity, stack overview, and architecture description. First thing inlined into agent entrypoints.
+- **`.pipes/utils/rules/rule-codebase-conventions.md`** — dos, don'ts, and enforced patterns. Active in every session.
+
+This pipeline replaces the old `rule-codebase-stack.md` single-file output with a cleaner separation: identity goes in ai-instructions, enforcement goes in rules.
 
 ## Memory Contract
 
@@ -82,23 +87,24 @@ Model Guidance:
 
 ---
 
-### Phase 3: Check Existing Rule
-**Objective:** Detect whether a stack rule already exists and set mode accordingly
+### Phase 3: Check Existing Files
+**Objective:** Detect whether output files already exist and set mode accordingly
 
 **Fragments:**
 - `fragment-check-existing-stack-rule`
 
 **Instructions:**
-1. Check if `.pipes/utils/rules/rule-codebase-stack.md` exists in the current project
-2. If it exists:
-   - Read the current content
-   - Inform the user: "A stack rule already exists. Running in update mode."
+1. Check if `.pipes/ai-instructions/project.md` exists in the current project
+2. Check if `.pipes/utils/rules/rule-codebase-conventions.md` exists in the current project
+3. If either or both exist:
+   - Read the current content of any found files
+   - Inform the user: "Existing files found. Running in update mode."
    - Note which sections are present vs missing
    - Set mode: `update`
-3. If it does not exist:
-   - Inform the user: "No stack rule found. Running in create mode."
+4. If neither exists:
+   - Inform the user: "No existing files found. Running in create mode."
    - Set mode: `create`
-4. Do not modify anything in this phase — discovery only
+5. Do not modify anything in this phase — discovery only
 
 ---
 
@@ -120,26 +126,30 @@ Model Guidance:
 
 ---
 
-### Phase 5: Draft Rule
-**Objective:** Generate the complete rule file content
+### Phase 5: Draft Files
+**Objective:** Generate both output files
 
 **Fragments:**
-- `fragment-draft-stack-rule`
-- `fragment-format-stack-rule`
+- `fragment-draft-project-instruction`
+- `fragment-draft-codebase-conventions-rule`
+- `fragment-format-project-instruction`
+- `fragment-format-codebase-conventions-rule`
 
 **Instructions:**
-1. Use `fragment-draft-stack-rule` to compose the full rule from confirmed inputs
-2. Use `fragment-format-stack-rule` as the structural template
-3. Populate all sections:
-   - Frontmatter (`id`, `name`, `type`, `version`)
-   - Stack overview table
-   - Architecture section
-   - Best practices list
-   - Dos section
-   - Don'ts section
-   - Project conventions
-4. In update mode: merge new information with existing content, preserving anything already correct
-5. Present the complete draft — do not write files yet
+1. Use `fragment-draft-project-instruction` + `fragment-format-project-instruction` to compose `project.md`:
+   - Frontmatter: `id: project`, `assembly: inline`
+   - Heading: `# Project: {project name}`
+   - Summary: 1–3 sentences describing what the project is
+   - `## Stack` table: layer → technology
+   - `## Architecture` section: how it's structured
+2. Use `fragment-draft-codebase-conventions-rule` + `fragment-format-codebase-conventions-rule` to compose `rule-codebase-conventions.md`:
+   - Frontmatter with `id`, `name`, `type: codebase`, `version`, `description`
+   - `## Dos` section
+   - `## Don'ts` section
+   - `## Best Practices` section (if captured)
+   - `## Conventions` section (if any project-specific ones)
+3. In update mode: merge new information with existing content, preserving anything already correct
+4. Present both complete drafts side by side — do not write files yet
 
 ---
 
@@ -160,16 +170,20 @@ Model Guidance:
 
 ---
 
-### Phase 7: Write Rule File
-**Objective:** Persist the approved rule to the project's `.pipes/utils/rules/`
+### Phase 7: Write Files
+**Objective:** Persist both approved files to the project
 
 **Fragments:**
 - `fragment-create-files`
 
 **Instructions:**
-1. Write the approved content to `.pipes/utils/rules/rule-codebase-stack.md`
+1. Write `project.md` to `.pipes/ai-instructions/project.md`
    - In create mode: create the file
-   - In update mode: overwrite the existing file with merged content
-2. Confirm the file was written successfully
-3. Output the final file path
-4. Remind the user that this rule will be active in all future sessions for this project
+   - In update mode: overwrite with merged content
+2. Write `rule-codebase-conventions.md` to `.pipes/utils/rules/rule-codebase-conventions.md`
+   - In create mode: create the file
+   - In update mode: overwrite with merged content
+3. Confirm both files were written successfully
+4. Output both final file paths
+5. Remind the user that `project.md` will be inlined first in all future agent entrypoints, and `rule-codebase-conventions` will be active in all future sessions
+6. Suggest running `pipeline-regenerate-agent-entry-points` to update entrypoints immediately

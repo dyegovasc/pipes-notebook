@@ -1,3 +1,7 @@
+---
+id: note-operations
+assembly: inline
+---
 # Note Operations: Working with Notes
 
 ## Note Lifecycle

@@ -310,6 +310,17 @@ async function main() {
   // ── Summary ────────────────────────────────────────────────────────────────
 
   console.log(`\nDone: ${installed} file(s) installed, ${skipped.length} skipped.`);
+
+  const rulesInstalled = toInstall.some(item =>
+    item.dest.includes(DEST.rules)
+  );
+
+  if (rulesInstalled) {
+    console.log(
+      '\nNew rules were imported. Run pipeline-regenerate-agent-entry-points\n' +
+      'to update the Active Rules table in your entrypoints.'
+    );
+  }
 }
 
 main().catch((err) => {

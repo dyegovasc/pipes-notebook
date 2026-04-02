@@ -3,6 +3,7 @@ id: rule-auto-update-catalog
 name: Auto Update Catalog
 type: shared
 version: 1.0
+description: Regenerates CATALOG.md when fragments, pipelines, or rules are created, modified, or deleted
 ---
 
 # Rule: Auto Update Catalog

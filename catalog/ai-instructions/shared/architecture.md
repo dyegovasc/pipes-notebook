@@ -1,4 +1,19 @@
+---
+id: architecture
+assembly: reference
+---
 # Architecture: Repository Structure, Concepts, and Conventions
+
+## System Overview
+
+This is a modular, markdown-first architecture for guiding AI agents through structured workflows. Its foundation has three governing layers and one scoped state layer:
+
+- **Fragments** — atomic, reusable instruction blocks
+- **Pipelines** — multi-phase workflows that compose fragments
+- **Rules** — universal governance applied automatically to all sessions
+- **Memory Surfaces** — scoped Markdown state files such as `MEMORY.md` and `CURRENT.md`
+
+Fragments, pipelines, and rules are the governing architecture. Memory surfaces are the operating state used within that architecture. Agents must treat all four as first-class citizens, while preserving the precedence of rules and canonical instructions.
 
 ## Fragments
 

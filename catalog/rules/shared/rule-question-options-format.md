@@ -3,6 +3,7 @@ id: rule-question-options-format
 name: Question Options Format
 type: shared
 version: 1.0
+description: Enforces machine-readable key-value options in question fragments
 ---
 
 # Rule: Question Options Format

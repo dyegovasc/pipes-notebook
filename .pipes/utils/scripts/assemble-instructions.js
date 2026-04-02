@@ -3,13 +3,21 @@
 /**
  * Assembly Script for AI Instructions (Merge Mode)
  *
- * Dynamically scans .pipes/ai-instructions/ and .pipes/utils/rules/ then generates
+ * Scans .pipes/ai-instructions/ and .pipes/utils/rules/, then generates
  * or merges a Pipes Notebook section into agent entrypoint files.
  *
+ * Assembly behavior (driven by frontmatter `assembly` field):
+ *   inline    — file body is concatenated into the entrypoint
+ *   reference — file is listed as a pointer only (not inlined)
+ *   (default) — treated as inline if no frontmatter is found
+ *
+ * Rules are never inlined. Their `description` frontmatter field is used
+ * to generate a summary table injected at <!-- assembly:rules-table --> in core.md.
+ *
  * Merge behavior:
- * - If entrypoint does not exist: creates it with just the Pipes section
- * - If entrypoint exists without delimiters: appends the Pipes section
- * - If entrypoint exists with delimiters: replaces only the delimited section
+ *   - If entrypoint does not exist: creates it with just the Pipes section
+ *   - If entrypoint exists without delimiters: appends the Pipes section
+ *   - If entrypoint exists with delimiters: replaces only the delimited section
  *
  * Delimiters:
  *   <!-- pipes-notebook:start -->
@@ -24,6 +32,9 @@ const path = require('path');
 const DELIMITER_START = '<!-- pipes-notebook:start -->';
 const DELIMITER_END = '<!-- pipes-notebook:end -->';
 
+// Marker in core.md where the rules table is injected
+const RULES_TABLE_MARKER = '<!-- assembly:rules-table -->';
+
 // Configuration
 const CONFIG = {
   pipesDir: '.pipes',
@@ -31,11 +42,11 @@ const CONFIG = {
   rulesDir: '.pipes/utils/rules',
   // Files listed here are included first, in this order.
   // Any other .md files in canonicalDir are appended alphabetically after.
+  // project.md may not exist yet (fresh install) — missing files are silently skipped.
   canonicalPriority: [
+    'project.md',
     'core.md',
-    'architecture.md',
-    'note-operations.md',
-    'tools.md'
+    'architecture.md'
   ],
   wrappers: [
     {
@@ -57,7 +68,23 @@ const CONFIG = {
 const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
 
 /**
- * Scan a directory for .md files
+ * Parse YAML frontmatter from a markdown file.
+ * Returns { meta, body } where meta is a key→value object and body is content without frontmatter.
+ */
+function parseFrontmatter(content) {
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return { meta: {}, body: content };
+  const meta = {};
+  for (const line of match[1].split('\n')) {
+    const kv = line.match(/^(\w[\w-]*):\s*(.+)$/);
+    if (kv) meta[kv[1]] = kv[2].trim();
+  }
+  const body = content.substring(match[0].length).replace(/^\n+/, '');
+  return { meta, body };
+}
+
+/**
+ * Scan a directory for .md files, returning sorted filenames.
  */
 function scanMarkdownFiles(dirPath) {
   const fullPath = path.join(REPO_ROOT, dirPath);
@@ -70,8 +97,25 @@ function scanMarkdownFiles(dirPath) {
 }
 
 /**
- * Build ordered list of canonical files:
- * priority files first (in declared order), then any remaining .md files alphabetically.
+ * Read a single file and return its content plus parsed frontmatter.
+ * Returns { success, filename, content, meta, body } or { success: false, error, filename }.
+ */
+function readFile(dir, filename) {
+  const filepath = path.join(REPO_ROOT, dir, filename);
+  try {
+    const content = fs.readFileSync(filepath, 'utf8');
+    const { meta, body } = parseFrontmatter(content);
+    return { success: true, content, meta, body, filename };
+  } catch (error) {
+    return { success: false, error: error.message, filename };
+  }
+}
+
+/**
+ * Build ordered list of canonical files with their assembly type.
+ * Returns array of { filename, assembly } objects.
+ * Priority files come first (in declared order), then remaining files alphabetically.
+ * Files in canonicalPriority that don't exist on disk are silently skipped.
  */
 function resolveCanonicalOrder() {
   const allFiles = scanMarkdownFiles(CONFIG.canonicalDir);
@@ -79,84 +123,83 @@ function resolveCanonicalOrder() {
 
   const prioritized = CONFIG.canonicalPriority.filter(f => allFiles.includes(f));
   const remaining = allFiles.filter(f => !prioritySet.has(f));
+  const ordered = [...prioritized, ...remaining];
 
-  return [...prioritized, ...remaining];
+  return ordered.map(filename => {
+    const { meta } = readFile(CONFIG.canonicalDir, filename);
+    const assembly = meta.assembly || 'inline';
+    return { filename, assembly };
+  });
 }
 
 /**
- * Read a file and return its content
+ * Generate the rules summary table markdown from an array of rule meta objects.
+ * Each item: { id, name, description }
  */
-function readFile(dir, filename) {
-  const filepath = path.join(REPO_ROOT, dir, filename);
-  try {
-    const content = fs.readFileSync(filepath, 'utf8');
-    return { success: true, content, filename };
-  } catch (error) {
-    return { success: false, error: error.message, filename };
-  }
+function generateRulesTable(ruleMeta) {
+  if (ruleMeta.length === 0) return '';
+  const rows = ruleMeta
+    .map(r => `| \`${r.id}\` | ${r.description || r.name || r.id} |`)
+    .join('\n');
+  return `| Rule | Description |\n|------|-------------|\n${rows}`;
 }
 
 /**
- * Read all files from a directory given an ordered list of filenames
+ * Generate the managed Pipes Notebook section content.
+ *
+ * @param {string} tool - The agent tool name (e.g. "Claude Code")
+ * @param {Array<{filename, assembly}>} fileEntries - Canonical file entries
+ * @param {Array<{filename, meta, body}>} inlineFiles - Files with assembly:inline (content to embed)
+ * @param {Array<{filename}>} referenceFiles - Files with assembly:reference (listed as pointers only)
+ * @param {Array<{id, name, description}>} ruleMeta - Rule frontmatter for summary table
  */
-function readAllFiles(dir, filenames) {
-  const results = [];
-  const errors = [];
-
-  for (const filename of filenames) {
-    const result = readFile(dir, filename);
-    if (result.success) {
-      results.push(result);
-    } else {
-      errors.push(`Failed to read ${dir}/${filename}: ${result.error}`);
-    }
-  }
-
-  return { files: results, errors };
-}
-
-/**
- * Generate the managed Pipes Notebook section content
- */
-function generatePipesSection(tool, canonicalFiles, ruleFiles) {
-  const canonicalList = canonicalFiles
+function generatePipesSection(tool, fileEntries, inlineFiles, referenceFiles, ruleMeta) {
+  // Build numbered list of inline files
+  const inlineList = inlineFiles
     .map((f, i) => `${i + 1}. \`.pipes/ai-instructions/${f.filename}\``)
     .join('\n');
 
-  let header = `# Pipes Notebook Instructions (${tool})
+  // Build bullet list of reference files
+  const referenceList = referenceFiles.length > 0
+    ? referenceFiles.map(f => `- \`.pipes/ai-instructions/${f.filename}\``).join('\n')
+    : null;
 
-This section is auto-managed by Pipes Notebook. Do not edit between the delimiters.
+  let header = `# Pipes Notebook Instructions (${tool})\n\nAuto-managed by Pipes Notebook. Do not edit between the delimiters.\n\nIncluded instructions (always active):\n${inlineList}\n`;
 
-Canonical instructions live in \`.pipes/ai-instructions/\`. Included in this order:
-
-${canonicalList}
-
-When in conflict with content outside this section, canonical Pipes Notebook files win for Pipes-related behavior.
-
----
-
-`;
-
-  const canonicalContent = canonicalFiles
-    .map(f => f.content)
-    .join('\n\n---\n\n');
-
-  let rulesContent = '';
-  if (ruleFiles.length > 0) {
-    const rulesBody = ruleFiles
-      .map(f => f.content)
-      .join('\n\n---\n\n');
-    rulesContent = '\n\n---\n\n# Rules (Always Active)\n\nThe following rules are enforced automatically. No invocation needed.\n\n---\n\n' + rulesBody;
+  if (referenceList) {
+    header += `\nFramework reference (read when working with pipes-notebook internals):\n${referenceList}\n`;
   }
 
-  const footer = `\n\n---\n\n*This section is auto-generated by \`.pipes/utils/scripts/assemble-instructions.js\`.*\n*Sources: .pipes/ai-instructions/, .pipes/utils/rules/*`;
+  header += `\nWhen in conflict with content outside this section, Pipes Notebook canonical files win for Pipes-related behavior.\n\n---\n\n`;
 
-  return header + canonicalContent + rulesContent + footer;
+  // Generate the rules table markdown
+  const rulesTable = generateRulesTable(ruleMeta);
+
+  // Concatenate inline file bodies, injecting rules table at the marker
+  let markerFound = false;
+  const inlineBodies = inlineFiles.map(f => {
+    if (f.body.includes(RULES_TABLE_MARKER)) {
+      markerFound = true;
+      return f.body.replace(RULES_TABLE_MARKER, rulesTable);
+    }
+    return f.body;
+  });
+
+  const canonicalContent = inlineBodies.join('\n\n---\n\n');
+
+  // If no marker was found in any inline file, append a standalone rules section as fallback
+  let fallbackRules = '';
+  if (!markerFound && rulesTable) {
+    fallbackRules = `\n\n---\n\n# Active Rules\n\n${rulesTable}\n\nFull definitions: \`.pipes/utils/rules/\``;
+  }
+
+  const footer = `\n\n---\n\n*Auto-generated by \`.pipes/utils/scripts/assemble-instructions.js\`*\n*Sources: .pipes/ai-instructions/, .pipes/utils/rules/*`;
+
+  return header + canonicalContent + fallbackRules + footer;
 }
 
 /**
  * Merge the Pipes section into an existing file or create a new one.
- *
  * Returns { action, content } where action is 'created' | 'replaced' | 'appended'
  */
 function mergeIntoFile(targetPath, pipesSection) {
@@ -185,7 +228,7 @@ function mergeIntoFile(targetPath, pipesSection) {
 }
 
 /**
- * Write content to a file, creating directories if needed
+ * Write content to a file, creating directories if needed.
  */
 function writeFile(targetPath, content) {
   const fullPath = path.join(REPO_ROOT, targetPath);
@@ -209,17 +252,37 @@ function writeFile(targetPath, content) {
 function assemble() {
   console.log('🔧 Assembling Pipes Notebook sections into entrypoints...\n');
 
-  // Step 1: Discover and read canonical files
-  const canonicalOrder = resolveCanonicalOrder();
+  // Step 1: Discover canonical files with assembly type
+  const canonicalEntries = resolveCanonicalOrder();
 
-  if (canonicalOrder.length === 0) {
+  if (canonicalEntries.length === 0) {
     console.error('❌ No .md files found in .pipes/ai-instructions/');
     console.error('   Run the init command to set up ai-instructions first.');
     process.exit(1);
   }
 
   console.log('Reading canonical files:');
-  const { files: canonicalFiles, errors: canonicalErrors } = readAllFiles(CONFIG.canonicalDir, canonicalOrder);
+  const inlineFiles = [];
+  const referenceFiles = [];
+  const canonicalErrors = [];
+
+  for (const entry of canonicalEntries) {
+    const result = readFile(CONFIG.canonicalDir, entry.filename);
+    if (!result.success) {
+      canonicalErrors.push(`Failed to read ${CONFIG.canonicalDir}/${entry.filename}: ${result.error}`);
+      continue;
+    }
+
+    const lines = result.body.split('\n').length;
+    const tag = entry.assembly === 'reference' ? '[reference]' : '[inline]';
+    console.log(`   ✓ ${entry.filename} ${tag} (${lines} lines)`);
+
+    if (entry.assembly === 'reference') {
+      referenceFiles.push({ filename: entry.filename });
+    } else {
+      inlineFiles.push({ filename: entry.filename, body: result.body });
+    }
+  }
 
   if (canonicalErrors.length > 0) {
     console.error('❌ Errors reading canonical files:');
@@ -227,29 +290,31 @@ function assemble() {
     process.exit(1);
   }
 
-  canonicalFiles.forEach(f => {
-    const lines = f.content.split('\n').length;
-    console.log(`   ✓ ${f.filename} (${lines} lines)`);
-  });
+  if (inlineFiles.length === 0) {
+    console.error('❌ No inline ai-instruction files found after assembly classification.');
+    process.exit(1);
+  }
 
-  // Step 2: Discover and read rules
+  // Step 2: Discover and read rules (frontmatter only for summary table)
   const ruleFilenames = scanMarkdownFiles(CONFIG.rulesDir);
+  const ruleMeta = [];
 
-  let ruleFiles = [];
   if (ruleFilenames.length > 0) {
-    console.log('\nReading rules:');
-    const { files, errors: ruleErrors } = readAllFiles(CONFIG.rulesDir, ruleFilenames);
-    ruleFiles = files;
-
-    if (ruleErrors.length > 0) {
-      console.warn('⚠️ Some rules could not be read:');
-      ruleErrors.forEach(e => console.warn(`   ${e}`));
+    console.log('\nReading rules (summary only):');
+    for (const filename of ruleFilenames) {
+      const result = readFile(CONFIG.rulesDir, filename);
+      if (result.success) {
+        const meta = result.meta;
+        ruleMeta.push({
+          id: meta.id || filename.replace('.md', ''),
+          name: meta.name || filename,
+          description: meta.description || ''
+        });
+        console.log(`   ✓ ${filename} — ${meta.description || '(no description)'}`);
+      } else {
+        console.warn(`   ⚠️ ${filename} — could not read: ${result.error}`);
+      }
     }
-
-    ruleFiles.forEach(f => {
-      const lines = f.content.split('\n').length;
-      console.log(`   ✓ ${f.filename} (${lines} lines)`);
-    });
   } else {
     console.log('\nNo rules found in .pipes/utils/rules/ (skipping)');
   }
@@ -259,7 +324,13 @@ function assemble() {
   const results = [];
 
   for (const wrapper of CONFIG.wrappers) {
-    const pipesSection = generatePipesSection(wrapper.tool, canonicalFiles, ruleFiles);
+    const pipesSection = generatePipesSection(
+      wrapper.tool,
+      canonicalEntries,
+      inlineFiles,
+      referenceFiles,
+      ruleMeta
+    );
     const { action, content } = mergeIntoFile(wrapper.target, pipesSection);
     const writeResult = writeFile(wrapper.target, content);
 
@@ -283,7 +354,7 @@ function assemble() {
   const successCount = results.filter(r => r.status === 'success').length;
   const errorCount = results.filter(r => r.status === 'error').length;
 
-  console.log(`Sources: ${canonicalFiles.length} canonical files, ${ruleFiles.length} rules`);
+  console.log(`Sources: ${inlineFiles.length} inline, ${referenceFiles.length} reference, ${ruleMeta.length} rules`);
 
   if (errorCount === 0) {
     console.log(`✅ Assembly complete: ${successCount} entrypoints processed.`);
@@ -298,4 +369,4 @@ if (require.main === module) {
   assemble();
 }
 
-module.exports = { assemble, resolveCanonicalOrder, scanMarkdownFiles, mergeIntoFile };
+module.exports = { assemble, resolveCanonicalOrder, scanMarkdownFiles, mergeIntoFile, parseFrontmatter };

@@ -35,7 +35,7 @@ Model Guidance:
 ## Phases
 
 ### Phase 1: Validate Sources
-**Objective:** Confirm that ai-instructions and rules exist in .pipes/ before generating
+**Objective:** Confirm that ai-instructions and rules exist in .pipes/ before generating. Identify which ai-instructions are inline vs. reference.
 
 **Fragments:**
 - `fragment-validate-pipes-sources`
@@ -44,7 +44,11 @@ Model Guidance:
 1. Check that `.pipes/ai-instructions/` exists and contains at least one `.md` file
 2. Check that `.pipes/utils/rules/` exists (may be empty)
 3. List the files that will be included in the generated section
-4. If ai-instructions is empty, stop and report the error
+4. For each ai-instruction file, read its `assembly` frontmatter field:
+   - `assembly: inline` (or no frontmatter) — file body will be embedded in the entrypoint
+   - `assembly: reference` — file will be listed as a pointer only, not inlined
+   Report which files are inline and which are reference.
+5. If ai-instructions is empty, stop and report the error
 
 ### Phase 2: Check Existing Entrypoints
 **Objective:** Detect which entrypoint files already exist and their current state
@@ -81,5 +85,7 @@ Model Guidance:
 
 **Instructions:**
 1. List each entrypoint and what action was taken (created, replaced, appended)
-2. If any files were appended (first-time merge into existing file), advise the user to review placement
-3. Suggest committing the changes
+2. List which ai-instructions were inlined and which were noted as reference-only
+3. List the rules included in the Active Rules summary table
+4. If any files were appended (first-time merge into existing file), advise the user to review placement
+5. Suggest committing the changes

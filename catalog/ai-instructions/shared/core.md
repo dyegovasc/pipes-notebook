@@ -1,29 +1,21 @@
-# Core: Identity, Principles, Agent Behavior
+---
+id: core
+assembly: inline
+---
+# Core: Agent Behavior
 
-This file takes precedence over all other canonical files. When conflicts arise, the rules here win.
+This project uses Pipes Notebook: a modular, markdown-first instruction system.
+Full framework reference: `.pipes/ai-instructions/architecture.md`
 
-## System Identity
+**Key concepts:** Fragments (atomic instruction blocks) compose into Pipelines (multi-phase workflows). Rules enforce constraints automatically. Memory surfaces (MEMORY.md, CURRENT.md) hold operating state.
 
-This project uses the Pipes Notebook instruction system: a modular, markdown-first architecture for guiding AI agents through structured workflows. Its foundation has three governing layers and one scoped state layer:
+## Principles
 
-- **Fragments** — atomic, reusable instruction blocks
-- **Pipelines** — multi-phase workflows that compose fragments
-- **Rules** — universal governance applied automatically to all sessions
-- **Memory Surfaces** — scoped Markdown state files such as `MEMORY.md` and `CURRENT.md`
-
-Fragments, pipelines, and rules are the governing architecture. Memory surfaces are the operating state used within that architecture. Agents must treat all four as first-class citizens, while preserving the precedence of rules and canonical instructions.
-
-## Core Principles
-
-**Single source of truth.** Every convention, structure, and workflow is defined once in fragments, pipelines, or rules. Canonical files guide agents toward those definitions; they do not redefine them.
-
-**Modular composition.** Fragments compose into pipelines. Pipelines define sequenced workflows. Rules apply universally without invocation. Agents work within this layered system rather than around it.
-
-**Scoped state, not governance.** Memory surfaces hold reusable or active context within a defined scope. They do not redefine policy, override rules, or replace notes.
-
-**Minimal, high-value edits.** Prefer targeted changes over broad rewrites. Check before creating. Confirm before modifying. Never guess when you can ask.
-
-**Strict phase discipline.** When a pipeline defines ordered phases, complete and present the current phase before advancing. Do not infer, draft, or execute later phases until the current phase has been confirmed.
+- **Single source of truth.** Defined once in fragments, pipelines, or rules. Canonical files guide agents toward those definitions; they do not redefine them.
+- **Modular composition.** Fragments compose into pipelines. Pipelines define sequenced workflows. Rules apply universally without invocation.
+- **Scoped state, not governance.** Memory surfaces hold context within a defined scope. They do not override rules or replace notes.
+- **Minimal, high-value edits.** Check before creating. Confirm before modifying. Never guess when you can ask.
+- **Strict phase discipline.** Complete and present the current phase before advancing. Do not infer or execute later phases until the current phase is confirmed.
 
 ## Agent Behavior Rules
 
@@ -37,20 +29,16 @@ Fragments, pipelines, and rules are the governing architecture. Memory surfaces 
 8. Smaller-capability models should prefer explicit memory fragments and templates over inference-heavy memory behavior.
 9. Universal rules apply to all outputs automatically. No invocation needed.
 
-## Universal Rules (Always Active)
+## Active Rules
 
-Rules are always enforced regardless of what pipeline is running. Add rows here as you install new rules.
-
-| Rule                           | Effect                                                                                 |
-| ------------------------------ | -------------------------------------------------------------------------------------- |
-| `rule-auto-update-catalog`     | Regenerates `CATALOG.md` when fragments or pipelines are created, modified, or deleted |
-| `rule-validate-fragment-types` | Validates fragment structure against type-specific requirements on create or modify    |
+<!-- assembly:rules-table -->
 
 Full definitions: `.pipes/utils/rules/`
 
 ## Precedence
 
-1. This file (`core.md`)
-2. `architecture.md`
-3. Additional canonical files in `.pipes/ai-instructions/` (alphabetical)
-4. Wrapper files (`CLAUDE.md`, `AGENTS.md`, `copilot-instructions.md`)
+1. `project.md` (project identity — when present)
+2. This file (`core.md`)
+3. Other inline ai-instructions (alphabetical)
+4. Reference ai-instructions (consulted on-demand from `.pipes/ai-instructions/`)
+5. Wrapper files (`CLAUDE.md`, `AGENTS.md`, `copilot-instructions.md`)
