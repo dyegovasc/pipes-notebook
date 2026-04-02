@@ -17,7 +17,7 @@ Pipes Notebook gives your AI agent a structured operating system: canonical inst
 Copy this prompt into your AI agent (Claude, Copilot, or any agent that can read URLs):
 
 ```
-Read https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/commands/init.md and execute it against this project. Use https://github.com/dyegovasc/pipes-notebook as the source repository.
+Read https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/commands/init.md and execute it against this project.
 ```
 
 The agent will:
@@ -46,6 +46,16 @@ your-project/
     copilot-instructions.md  ← auto-generated entrypoint
 ```
 
+## Import Pipelines
+
+Once `.pipes/` is installed, add pipelines (and their fragment dependencies) from the catalog:
+
+```
+Read https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/commands/import.md and execute it against this project.
+```
+
+The agent will list available pipelines grouped by category and let you pick which ones to install. It resolves all fragment dependencies automatically and never overwrites files you've already customised.
+
 ## Updating Entrypoints
 
 After editing ai-instructions or rules, regenerate your agent entrypoints:
@@ -61,6 +71,7 @@ The assembly script replaces only the Pipes Notebook section (between `<!-- pipe
 | Command | Description |
 |---------|-------------|
 | [init](commands/init.md) | Install Pipes Notebook into a project |
+| [import](commands/import.md) | Add pipelines and fragments from the catalog |
 
 ## License
 
