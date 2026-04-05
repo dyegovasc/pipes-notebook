@@ -7,7 +7,7 @@ version: 3.1
 
 # Command: Import
 
-Imports pipelines, fragments, and rules from the catalog into an existing `.pipes/` installation.
+Imports pipelines, fragments, and rules from the catalog into an existing pipes installation.
 
 **CRITICAL:** The agent must ALWAYS ask the user which pipelines and rules they want before running anything. Never auto-select, never use `--all`, never use `--yes` without explicit user confirmation. The `--all --yes` flags exist only for programmatic use, not for agent-driven imports.
 
@@ -17,7 +17,7 @@ Imports pipelines, fragments, and rules from the catalog into an existing `.pipe
 
 ## Prerequisites
 
-- The target project already has `.pipes/` installed (run `init` first if not)
+- The target project already has a pipes folder installed (run `init` first if not)
 - Node.js is available (`node --version`)
 
 ---
@@ -27,7 +27,18 @@ Imports pipelines, fragments, and rules from the catalog into an existing `.pipe
 ### Phase 1: Check Installation
 
 1. Ask the user for the **target path** if not already known.
-2. Confirm `{target_path}/.pipes/utils/scripts/import.js` exists.
+2. Detect which folder name is in use:
+   ```bash
+   if [ -d "{target_path}/pipes" ]; then
+     _pipes_dir=pipes
+   elif [ -d "{target_path}/.pipes" ]; then
+     _pipes_dir=.pipes
+   else
+     echo "No pipes installation found. Run init first."
+     exit 1
+   fi
+   ```
+3. Confirm `{target_path}/$_pipes_dir/utils/scripts/import.js` exists.
    - If missing, fall back to the manual path below.
 
 ### Phase 2: Fetch Catalog and Present Choices
@@ -40,7 +51,7 @@ Imports pipelines, fragments, and rules from the catalog into an existing `.pipe
    curl -sL https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/CATALOG.md
    ```
 
-2. Parse the **Pipelines** and **Rules** tables. For each entry check if the file already exists at its destination in `{target_path}/.pipes/`.
+2. Parse the **Pipelines** and **Rules** tables. For each entry check if the file already exists at its destination in `{target_path}/$_pipes_dir/`.
 
 3. Display the full list grouped by domain, marking installed items with `(installed)`:
 
@@ -77,7 +88,7 @@ Only after the user has chosen, run the script passing their exact selection:
 
 ```bash
 cd {target_path}
-node .pipes/utils/scripts/import.js --select {selected_ids}
+node $_pipes_dir/utils/scripts/import.js --select {selected_ids}
 ```
 
 The script will:
@@ -88,7 +99,7 @@ The script will:
 If the user said `all`, use:
 
 ```bash
-node .pipes/utils/scripts/import.js --all
+node $_pipes_dir/utils/scripts/import.js --all
 ```
 
 The `--yes` flag bypasses the script's confirmation prompt. **Only add `--yes` if the user explicitly confirmed in the conversation that they want to proceed without a further prompt.**
@@ -103,7 +114,13 @@ Use if `import.js` is not available or Node.js is not installed.
 ### Phase 1: Check Installation
 
 1. Ask the user for the **target path**.
-2. Check that `{target_path}/.pipes/utils/pipelines/` and `{target_path}/.pipes/utils/fragments/` exist.
+2. Detect which folder name is in use:
+   ```bash
+   if [ -d "{target_path}/pipes" ]; then _pipes_dir=pipes
+   elif [ -d "{target_path}/.pipes" ]; then _pipes_dir=.pipes
+   else echo "No pipes installation found. Run init first."; exit 1; fi
+   ```
+3. Check that `{target_path}/$_pipes_dir/utils/pipelines/` and `{target_path}/$_pipes_dir/utils/fragments/` exist.
    - If missing, stop and tell the user to run `init` first.
 
 ### Phase 2: Read Catalog and Show List
@@ -130,13 +147,18 @@ For each file to install:
 
 1. Source URL: the absolute `url` from CATALOG.md (`raw.githubusercontent.com/…`)
 2. Destination:
-   - Pipeline → `{target_path}/.pipes/utils/pipelines/{filename}`
-   - Fragment → `{target_path}/.pipes/utils/fragments/{type}/{filename}` (`type` = second-to-last URL segment)
-   - Rule → `{target_path}/.pipes/utils/rules/{filename}`
+   - Pipeline → `{target_path}/$_pipes_dir/utils/pipelines/{filename}`
+   - Fragment → `{target_path}/$_pipes_dir/utils/fragments/{type}/{filename}` (`type` = second-to-last URL segment)
+   - Rule → `{target_path}/$_pipes_dir/utils/rules/{filename}`
 
 ```bash
 mkdir -p "{destination_dir}"
 curl -sL "{url}" -o "{destination_path}"   # only if file does not exist
+```
+
+**For notebook projects (`_pipes_dir=pipes`) only:** after copying, rewrite any `.pipes/` references in the newly installed file:
+```bash
+sed -i '' 's|\.pipes/|pipes/|g' "{destination_path}"
 ```
 
 ### Phase 5: Report
@@ -149,7 +171,7 @@ Display what was installed vs skipped.
 
 | Condition | Action |
 |-----------|--------|
-| `.pipes/` not found | Stop — tell user to run `init` first |
+| No pipes folder found | Stop — tell user to run `init` first |
 | `import.js` missing | Use manual fallback path |
 | ID not in catalog | List invalid IDs, ask user to correct |
 | Fragment not in CATALOG.md | Report missing ID, stop |
@@ -157,7 +179,7 @@ Display what was installed vs skipped.
 
 ## Notes
 
-- `import.js` is installed automatically during `init` as part of the `.pipes/` skeleton.
+- `import.js` is installed automatically during `init` as part of the pipes skeleton.
 - Import never overwrites existing files. Re-run to pick up newly added catalog entries.
 - Fragments are always resolved from pipeline dependencies — never selected individually.
 - Rules must be selected explicitly; they are not auto-resolved from pipelines.

@@ -32,9 +32,12 @@ That's it. Your project now has a structured instruction layer your agent can op
 
 ## Structure After Init
 
+The pipes folder name depends on project type:
+
+**Notebook (Obsidian vault)** — uses `pipes/` so the folder is visible inside Obsidian:
 ```
-your-project/
-  .pipes/
+your-vault/
+  pipes/
     ai-instructions/        ← canonical instructions (from catalog)
     utils/
       fragments/             ← atomic instruction blocks
@@ -46,6 +49,23 @@ your-project/
   AGENTS.md                  ← auto-generated entrypoint
   .github/
     copilot-instructions.md  ← auto-generated entrypoint
+```
+
+**Codebase (software project)** — uses `.pipes/` following dotfolder convention:
+```
+your-project/
+  .pipes/
+    ai-instructions/
+    utils/
+      fragments/
+      pipelines/
+      rules/
+      scripts/
+        assemble-instructions.js
+  CLAUDE.md
+  AGENTS.md
+  .github/
+    copilot-instructions.md
 ```
 
 ## Import Pipelines
