@@ -46,7 +46,7 @@ Initializes Pipes Notebook in a project through a layered sequence: scaffold str
 
    > What type of project is this?
    >
-   > - notebook: "Obsidian vault or markdown notebook"
+   > - notebook: "Obsidian vault or md notebook"
    > - codebase: "Software project or repository"
 
 2. Capture the selection.
