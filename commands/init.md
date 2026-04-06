@@ -187,7 +187,7 @@ Initializes Pipes Notebook in a project through a layered sequence: scaffold str
 
 ### Phase 4: Check Agent Entrypoints
 
-**Objective:** Detect existing agent entrypoint files and decide how to handle them.
+**Objective:** Detect existing agent entrypoint files and show the user what would happen. **Do not touch any entrypoint file yet.**
 
 **Instructions:**
 
@@ -196,28 +196,30 @@ Initializes Pipes Notebook in a project through a layered sequence: scaffold str
    - `AGENTS.md`
    - `.github/copilot-instructions.md`
 
-2. **If none exist:**
-   - Ask: "No agent entrypoint files found. Create them now?"
-   - If yes, proceed to Phase 5.
-   - If no, skip to Phase 6.
+2. For each file, determine its status:
+   - Missing → `will create`
+   - Exists, no Pipes delimiters → `will append`
+   - Exists, has Pipes delimiters (`<!-- pipes-notebook:start -->` / `<!-- pipes-notebook:end -->`) → `will replace section`
 
-3. **If some or all exist:**
-   - For each existing file, check if it contains Pipes Notebook delimiters (`<!-- pipes-notebook:start -->` / `<!-- pipes-notebook:end -->`).
-   - Present the status:
-     ```
-     CLAUDE.md                       — exists, no Pipes section (will append)
-     AGENTS.md                       — exists, has Pipes section (will replace)
-     .github/copilot-instructions.md — missing (will create)
-     ```
-   - Ask: "Run pipeline-regenerate-agent-entry-points to update these?"
-   - If yes, proceed to Phase 5.
-   - If no, skip to Phase 6.
+3. Show the status table and ask for explicit permission before proceeding:
+   ```
+   Agent entrypoint status:
+     CLAUDE.md                       — will create
+     AGENTS.md                       — will append
+     .github/copilot-instructions.md — will create
+
+   Generate agent entrypoints now? (yes / no / skip)
+   ```
+
+4. **STOP and wait for the user's answer.** Do not proceed to Phase 5 until the user explicitly says yes.
+   - `yes` → proceed to Phase 5
+   - `no` or `skip` → skip to Phase 6 with a note that entrypoints were not generated
 
 ---
 
 ### Phase 5: Generate Agent Entrypoints
 
-**Objective:** Run the assembly script to generate or merge Pipes Notebook sections into entrypoints.
+**Objective:** Run the assembly script to generate or merge Pipes Notebook sections into entrypoints. **Only reached with explicit user permission from Phase 4.**
 
 **Instructions:**
 
