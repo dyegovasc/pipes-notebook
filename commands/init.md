@@ -138,7 +138,7 @@ Initializes Pipes Notebook in a project through a layered sequence: scaffold str
 9. **For `notebook` only:** Rewrite all internal `.pipes/` path references in the installed files to `pipes/` so rules, pipelines, and instructions refer to the correct visible folder:
 
    ```bash
-   find "{target_path}/pipes/" -name "*.md" -exec sed -i '' 's|\.pipes/|pipes/|g' {} \;
+   find "{target_path}/pipes/" -type f \( -name "*.md" -o -name "*.js" \) -exec sed -i '' 's|\.pipes/|pipes/|g' {} \;
    ```
 
 10. Clean up temp directory:
