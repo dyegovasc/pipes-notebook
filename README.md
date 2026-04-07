@@ -82,15 +82,7 @@ The agent will list available pipelines grouped by category and let you pick whi
 
 Importing from the catalog is just the starting point. The real power is building pipelines tailored to your project.
 
-A pipeline is a plain markdown file that chains fragments together into a multi-phase workflow. You can create one for anything repetitive you do with your agent: a release checklist, an onboarding flow, a code review process, a content template — whatever fits your workflow.
-
-**To create a pipeline, just ask your agent:**
-
-```
-Create a new pipeline in .pipes/utils/pipelines/ that [describes what you want it to do].
-```
-
-The agent will scaffold the pipeline file, wire up the right fragments, and add it to your catalog so it's available in future sessions. You own it, you can edit it in plain markdown, and it works the same as any pipeline from the catalog.
+To create a pipeline, run the pre-installed `pipeline-create-pipeline` pipeline. It will guide you through the process and scaffold everything correctly — fragments, structure, and catalog registration included.
 
 > The more pipelines you build, the more leverage you get — each one is a repeatable workflow your agent can execute reliably, without you explaining the steps each time.
 
