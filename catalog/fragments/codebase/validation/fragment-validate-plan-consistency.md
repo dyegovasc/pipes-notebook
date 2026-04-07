@@ -2,7 +2,7 @@
 id: fragment-validate-plan-consistency
 name: Validate Plan Consistency
 type: validation
-version: 1.0
+version: 1.1
 domain: codebase
 ---
 
@@ -28,6 +28,7 @@ Validates that the generated implementation plan accurately reflects the current
    - **Pass** — no high-severity contradictions found
    - **Review** — medium contradictions found; corrections recommended
    - **Fail** — high-severity contradictions found; plan must be updated before implementation
+5. **Keep consistency separate from ambiguity** — this fragment checks contradictions against the current codebase; ambiguity classification happens in a separate validation step
 
 ## Output
 - `contradictions`: list of contradiction objects with location, plan_state, codebase_state, severity, and correction

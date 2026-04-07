@@ -2,7 +2,7 @@
 id: fragment-format-implementation-plan
 name: Format Implementation Plan
 type: output
-version: 1.0
+version: 1.1
 domain: codebase
 ---
 
@@ -41,6 +41,26 @@ status: draft
 **Affected Components:** {affected_components}
 **Blast Radius:** {blast_radius_rating} — {blast_radius_justification}
 
+## Alternatives Considered
+{hypotheses summary}
+
+## Recommended Approach
+**Selected Hypothesis:** {selected_hypothesis}
+**Recommendation Status:** {recommendation_status}
+
+### Why This Approach
+{selection_rationale}
+
+### Why The Alternatives Are Weaker
+{alternative_rejections}
+
+## Assumptions
+{recommendation_assumptions}
+{architecture_assumptions}
+
+## Open Decisions
+{remaining_shared_decisions}
+
 ## Solution Architecture
 {architecture_description}
 
@@ -75,6 +95,8 @@ status: draft
 
 **Reversible:** {reversible}
 **Blockers:** {blockers}
+**Assumption Risks:** {assumption_risks}
+**Ambiguities To Validate:** {blocking_ambiguities}
 
 ## Acceptance Criteria
 {confirmed success_criteria}
@@ -92,4 +114,4 @@ Generate the filename as: `{number}-plan-{short-description}.md`
 1. Populate every section from the outputs captured across all prior phases
 2. Do not leave any section empty — use "None identified" if applicable
 3. Display the full formatted document to the user before requesting approval
-4. Do not write the file — file creation is handled by `fragment-create-files`
+4. Do not write the file — file creation is handled by `fragment-create-plan-file`

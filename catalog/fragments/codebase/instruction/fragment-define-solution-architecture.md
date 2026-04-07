@@ -2,7 +2,7 @@
 id: fragment-define-solution-architecture
 name: Define Solution Architecture
 type: instruction
-version: 1.0
+version: 1.1
 domain: codebase
 ---
 
@@ -16,11 +16,14 @@ Defines the architecture of the selected solution including data flow, component
 2. **Define data flow** — how data enters, transforms, and exits the system for this feature
 3. **List impacted files** — for each file: path, action (create / modify / delete), and brief description of change
 4. **Flag architectural decisions** — any decisions made that deviate from existing patterns and why
-5. **Identify new abstractions** — any new interfaces, types, or contracts being introduced
+5. **Record architecture assumptions** — note assumptions that the implementation plan depends on
+6. **Identify new abstractions** — any new interfaces, types, or contracts being introduced
 
 ## Output
 - `architecture_description`: narrative description of the solution design
 - `data_flow`: step-by-step data flow description
 - `impacted_files`: list of `{ path, action, description }` objects
 - `architectural_decisions`: list of notable decisions with rationale
+- `architecture_assumptions`: list of assumptions the architecture depends on
+- `deviation_from_existing_patterns`: list of deliberate deviations and why they are justified
 - `new_abstractions`: list of new interfaces or contracts introduced
