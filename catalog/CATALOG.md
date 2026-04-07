@@ -24,6 +24,7 @@ URL is an absolute `raw.githubusercontent.com` link — fetch directly or use to
 | pipeline-define-writing-style | Define Writing Style | Captures writing preferences and generates a tailored writing style rule | notebook | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/pipelines/notebook/pipeline-define-writing-style.md |
 | pipeline-define-codebase-stack | Define Codebase Stack | Captures project stack, conventions, and generates a project identity ai-instruction and a codebase conventions rule | codebase | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/pipelines/codebase/pipeline-define-codebase-stack.md |
 | pipeline-define-commit-guardrails | Define Commit Guardrails | Captures VCS and commit safety requirements and generates a tailored commit guardrails rule | codebase | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/pipelines/codebase/pipeline-define-commit-guardrails.md |
+| pipeline-plan-new-feature | New Feature Implementation Plan | Validates intent, maps codebase context, designs solution architecture, and produces a detailed implementation plan before any code is written | codebase | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/pipelines/codebase/pipeline-plan-new-feature.md |
 
 ---
 
@@ -113,6 +114,17 @@ URL is an absolute `raw.githubusercontent.com` link — fetch directly or use to
 | fragment-check-existing-guardrails-rule | Check Existing Guardrails Rule | Detects whether a commit guardrails rule already exists and sets create vs update mode | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-check-existing-guardrails-rule.md |
 | fragment-draft-commit-guardrails-rule | Draft Commit Guardrails Rule | Drafts commit guardrails rule content from confirmed VCS and security inputs | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-draft-commit-guardrails-rule.md |
 | fragment-draft-codebase-conventions-rule | Draft Codebase Conventions Rule | Drafts codebase conventions rule content from confirmed dos, don'ts, and practices | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-draft-codebase-conventions-rule.md |
+| fragment-establish-scope-guardrails | Establish Scope Guardrails | Defines explicit in-scope and out-of-scope boundaries and safety constraints for a feature implementation | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-establish-scope-guardrails.md |
+| fragment-read-project-instruction | Read Project Instruction | Reads .pipes/ai-instructions/project.md if it exists and extracts stack, architecture, and conventions as baseline context | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-read-project-instruction.md |
+| fragment-analyze-codebase-context | Analyze Codebase Context | Scans the codebase to understand its structure and identify modules relevant to the feature being planned | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-analyze-codebase-context.md |
+| fragment-map-system-boundaries | Map System Boundaries | Identifies system boundaries, integration points, and components affected by a feature implementation | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-map-system-boundaries.md |
+| fragment-assess-blast-radius | Assess Blast Radius | Assesses the potential impact and regression surface of a feature implementation | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-assess-blast-radius.md |
+| fragment-generate-solution-hypotheses | Generate Solution Hypotheses | Generates multiple distinct solution approaches for a feature with trade-offs assessed | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-generate-solution-hypotheses.md |
+| fragment-select-solution | Select Solution | Evaluates generated solution hypotheses and selects the optimal approach | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-select-solution.md |
+| fragment-define-solution-architecture | Define Solution Architecture | Defines the architecture of the selected solution including data flow and impacted files | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-define-solution-architecture.md |
+| fragment-define-implementation-steps | Define Implementation Steps | Breaks the selected solution into a sequenced list of concrete implementation steps | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-define-implementation-steps.md |
+| fragment-draft-test-strategy | Draft Test Strategy | Documents the test coverage plan for a feature implementation | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-draft-test-strategy.md |
+| fragment-assess-implementation-risks | Assess Implementation Risks | Identifies implementation risks, regressions, and mitigations before any code is written | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/instruction/fragment-assess-implementation-risks.md |
 
 ### codebase › output
 
@@ -121,6 +133,7 @@ URL is an absolute `raw.githubusercontent.com` link — fetch directly or use to
 | fragment-format-stack-rule | Format Stack Rule | Formats the drafted stack rule as a structured rule file | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/output/fragment-format-stack-rule.md |
 | fragment-format-commit-guardrails-rule | Format Commit Guardrails Rule | Formats the commit guardrails rule as a structured rule file | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/output/fragment-format-commit-guardrails-rule.md |
 | fragment-format-codebase-conventions-rule | Format Codebase Conventions Rule | Formats the codebase conventions rule as a structured rule file | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/output/fragment-format-codebase-conventions-rule.md |
+| fragment-format-implementation-plan | Format Implementation Plan | Formats all gathered planning data into a structured implementation plan markdown document | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/output/fragment-format-implementation-plan.md |
 
 ### codebase › question
 
@@ -129,6 +142,13 @@ URL is an absolute `raw.githubusercontent.com` link — fetch directly or use to
 | fragment-ask-project-context | Ask Project Context | Asks for high-level context about the codebase and team | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/question/fragment-ask-project-context.md |
 | fragment-ask-stack-details | Ask Stack Details | Asks detailed questions about technologies, tooling, and conventions | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/question/fragment-ask-stack-details.md |
 | fragment-ask-commit-preferences | Ask Commit Preferences | Asks for VCS, package manager, secret patterns, and commit safety requirements | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/question/fragment-ask-commit-preferences.md |
+| fragment-ask-feature-requirements | Ask Feature Requirements | Gathers the feature description, requirements, and success criteria from the user | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/question/fragment-ask-feature-requirements.md |
+
+### codebase › validation
+
+| id | name | description | url |
+|---|---|---|---|
+| fragment-validate-plan-consistency | Validate Plan Consistency | Validates that an implementation plan accurately reflects the current codebase state by identifying contradictions and providing corrections | https://raw.githubusercontent.com/dyegovasc/pipes-notebook/main/catalog/fragments/codebase/validation/fragment-validate-plan-consistency.md |
 
 ---
 

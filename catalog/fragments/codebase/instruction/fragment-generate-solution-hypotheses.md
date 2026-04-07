@@ -1,0 +1,25 @@
+---
+id: fragment-generate-solution-hypotheses
+name: Generate Solution Hypotheses
+type: instruction
+version: 1.0
+domain: codebase
+---
+
+# Fragment: Generate Solution Hypotheses
+
+Generates multiple distinct solution approaches for the feature, each with trade-offs assessed.
+
+## Instructions
+
+1. **Generate at least 2 and at most 4 hypotheses** — each must be a genuinely different approach, not a variation of the same idea
+2. **For each hypothesis, document:**
+   - Approach name and summary
+   - How it satisfies the requirements
+   - Key trade-offs (complexity, performance, maintainability, risk)
+   - Dependencies or constraints introduced
+3. **Present all hypotheses clearly** before any selection is made
+4. **Do not select a solution in this fragment** — selection happens in `fragment-select-solution`
+
+## Output
+- `hypotheses`: list of approach objects, each with name, summary, trade-offs, and constraints
